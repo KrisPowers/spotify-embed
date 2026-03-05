@@ -117,8 +117,12 @@
 .liveDot {
   width: 7px;
   height: 7px;
-  background: var(--green);
+  background: var(--text-3);
   border-radius: 50%;
+}
+
+.liveDotPlaying {
+  background: var(--green);
   animation: pulse 2.4s ease-in-out infinite;
 }
 
@@ -153,20 +157,9 @@
 }
 
 .previewImg {
-  opacity: 0;
-  transition: opacity 0.3s ease;
   display: flex;
   align-items: center;
   justify-content: center;
-}
-
-.previewImgLoaded {
-  opacity: 1;
-}
-
-.previewImg img {
-  max-width: 100%;
-  border-radius: 4px;
 }
 
 .previewSkeleton {

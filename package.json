@@ -1,5 +1,5 @@
 {
-  "name": "spotify-embed",
+  "name": "spotify-readme-badge",
   "version": "1.0.0",
   "description": "Spotify Now Playing badge for GitHub READMEs — Cloudflare Pages",
   "type": "module",

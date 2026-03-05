@@ -58,41 +58,66 @@ function StepNumber({ n }: { n: number }) {
   return <div className={styles.stepNum}>{n}</div>;
 }
 
+type PreviewStatus = "loading" | "playing" | "idle" | "error";
+
 function BadgePreview() {
-  const [src, setSrc] = useState("/now-playing?" + Date.now());
-  const [loaded, setLoaded] = useState(false);
+  const [blobUrl, setBlobUrl] = useState<string | null>(null);
+  const [status, setStatus] = useState<PreviewStatus>("loading");
+
+  const fetchBadge = async () => {
+    setStatus("loading");
+    try {
+      // ?nocache=1 tells the CF function to respond with no-store headers.
+      // We also add a timestamp so the browser never serves from its own cache.
+      const res = await fetch(`/now-playing.svg?nocache=1&t=${Date.now()}`, {
+        cache: "no-store",
+        headers: { "Pragma": "no-cache" },
+      });
+      if (!res.ok) { setStatus("error"); return; }
+      const svg = await res.text();
+      // Revoke previous blob to avoid memory leaks
+      setBlobUrl((prev) => { if (prev) URL.revokeObjectURL(prev); return null; });
+      const blob = new Blob([svg], { type: "image/svg+xml" });
+      const url = URL.createObjectURL(blob);
+      setBlobUrl(url);
+      setStatus(svg.includes("Not playing") ? "idle" : "playing");
+    } catch {
+      setStatus("error");
+    }
+  };
 
   useEffect(() => {
-    const interval = setInterval(() => {
-      setSrc("/now-playing?" + Date.now());
-      setLoaded(false);
-    }, 30000);
+    fetchBadge();
+    const interval = setInterval(fetchBadge, 10000);
     return () => clearInterval(interval);
   }, []);
+
+  // Cleanup blob on unmount
+  useEffect(() => {
+    return () => { if (blobUrl) URL.revokeObjectURL(blobUrl); };
+  }, [blobUrl]);
 
   return (
     <div className={styles.previewWrap}>
       <div className={styles.previewLabel}>
         <div className={styles.liveIndicator}>
-          <span className={styles.liveDot} />
-          <span>LIVE PREVIEW</span>
+          <span className={`${styles.liveDot} ${status === "playing" ? styles.liveDotPlaying : ""}`} />
+          <span>
+            {status === "loading" ? "FETCHING…" : status === "playing" ? "NOW PLAYING" : status === "error" ? "ERROR" : "LIVE PREVIEW"}
+          </span>
         </div>
-        <button
-          className={styles.refreshBtn}
-          onClick={() => { setSrc("/now-playing?" + Date.now()); setLoaded(false); }}
-        >
+        <button className={styles.refreshBtn} onClick={fetchBadge}>
           ↻ Refresh
         </button>
       </div>
       <div className={styles.previewCard}>
-        <div className={`${styles.previewImg} ${loaded ? styles.previewImgLoaded : ""}`}>
+        {blobUrl ? (
           <img
-            src={src}
+            src={blobUrl}
             alt="Now Playing badge preview"
-            onLoad={() => setLoaded(true)}
+            style={{ maxWidth: "100%", borderRadius: "4px", display: "block" }}
           />
-        </div>
-        {!loaded && (
+        ) : (
           <div className={styles.previewSkeleton}>
             <div className={styles.skeletonArt} />
             <div className={styles.skeletonLines}>
@@ -109,7 +134,7 @@ function BadgePreview() {
 
 export default function App() {
   const origin = typeof window !== "undefined" ? window.location.origin : "https://your-project.pages.dev";
-  const embedCode = `![Now Playing](${origin}/now-playing)`;
+  const embedCode = `![Now Playing](${origin}/now-playing.svg)`;
   const redirectUri = `${origin}/callback`;
 
   return (

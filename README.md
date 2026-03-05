@@ -3,7 +3,7 @@
 A Cloudflare Pages app (Vite + React + TypeScript) that serves a live SVG badge showing your currently playing Spotify track.
 
 ```markdown
-![Now Playing](https://your-project.pages.dev/now-playing)
+![Now Playing](https://your-project.pages.dev/now-playing.svg)
 ```
 
 ## Routes
@@ -11,7 +11,7 @@ A Cloudflare Pages app (Vite + React + TypeScript) that serves a live SVG badge 
 | Route | Description |
 |---|---|
 | `/` | Setup guide + live badge preview |
-| `/now-playing` | Live SVG badge (embed this) |
+| `/now-playing.svg` | Live SVG badge (embed this) |
 | `/auth` | One-time Spotify OAuth flow |
 | `/callback` | OAuth redirect handler (shows refresh token) |
 
@@ -42,7 +42,7 @@ Visit `https://your-project.pages.dev/auth` → authorize → copy the token sho
 
 ### 5. Embed
 ```markdown
-![Now Playing](https://your-project.pages.dev/now-playing)
+![Now Playing](https://your-project.pages.dev/now-playing.svg)
 ```
 
 ## Local development
