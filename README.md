@@ -1,4 +1,4 @@
-# 🎵 Spotify Now Playing — GitHub README Badge
+# Spotify Now Playing — GitHub README Badge
 
 A Cloudflare Pages app (Vite + React + TypeScript) that serves a live SVG badge showing your currently playing Spotify track.
 
@@ -59,3 +59,6 @@ SPOTIFY_CLIENT_ID=...
 SPOTIFY_CLIENT_SECRET=...
 SPOTIFY_REFRESH_TOKEN=...
 ```
+
+### Example of the final result: (if I am listening to music.....)
+![Now Playing](https://spotify.krispowers.dev/now-playing.svg)
