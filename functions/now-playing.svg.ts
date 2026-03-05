@@ -93,7 +93,7 @@ function svgPlaying(
 ): string {
   const W = 480, H = 130;
   const prog = durationMs > 0 ? Math.min(progressMs / durationMs, 1) : 0;
-  const barW = 316;
+  const barW = 296;
   const filledW = Math.round(barW * prog);
   const trackText = esc(trunc(track, 36));
   const artistText = esc(trunc(artists, 44));
