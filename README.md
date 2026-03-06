@@ -1,4 +1,4 @@
-# Spotify Now Playing — GitHub README Badge
+# 🎵 Spotify Now Playing — GitHub README Badge
 
 A Cloudflare Pages app (Vite + React + TypeScript) that serves a live SVG badge showing your currently playing Spotify track.
 
@@ -60,5 +60,38 @@ SPOTIFY_CLIENT_SECRET=...
 SPOTIFY_REFRESH_TOKEN=...
 ```
 
-### Example of the final result: (if I am listening to music.....)
-![Now Playing](./now-playing.svg)
+---
+
+## Worker deploy (recommended for README embeds)
+
+The Pages Function URL goes through Cloudflare's edge cache and GitHub's Camo proxy, which both cache aggressively. For a reliably live embed in **any** GitHub README, deploy `worker.ts` as a standalone Cloudflare Worker instead — Workers bypass the edge cache entirely on every request.
+
+### Deploy
+
+```bash
+# Install wrangler if you haven't
+npm install -g wrangler
+wrangler login
+
+# Deploy the worker
+npx wrangler deploy worker.ts --name spotify-now-playing --compatibility-date 2024-01-01
+
+# Add your secrets
+npx wrangler secret put SPOTIFY_CLIENT_ID
+npx wrangler secret put SPOTIFY_CLIENT_SECRET
+npx wrangler secret put SPOTIFY_REFRESH_TOKEN
+```
+
+Your worker will be live at:
+`https://spotify-now-playing.<your-subdomain>.workers.dev`
+
+### Embed
+
+```markdown
+![Now Playing](https://spotify-now-playing.<your-subdomain>.workers.dev)
+```
+
+This URL works in any GitHub README and updates on every page load.
+
+### Preview (if I am listening to music)
+![Now Playing](https://now-playing.krispowers.dev/)

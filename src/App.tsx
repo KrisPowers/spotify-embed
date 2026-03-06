@@ -238,7 +238,9 @@ function BadgePreview() {
 
 export default function App() {
   const origin = typeof window !== "undefined" ? window.location.origin : "https://your-project.pages.dev";
-  const embedCode = `![Now Playing](${origin}/now-playing.svg)`;
+  // Worker URL — replace with your actual workers.dev subdomain after deploying worker.ts
+  const workerUrl = "https://spotify-now-playing.YOUR-SUBDOMAIN.workers.dev";
+  const embedCode = `![Now Playing](${workerUrl})`;
   const redirectUri = `${origin}/callback`;
 
   return (
