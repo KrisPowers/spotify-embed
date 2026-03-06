@@ -6,6 +6,8 @@ A single Cloudflare Worker that serves a setup UI and live SVG badges for your G
 ![Now Playing](https://spotify.krispowers.dev/now-playing.svg)
 <br>
 ![Top Tracks](https://spotify.krispowers.dev/top-tracks.svg?range=short_term&count=5)
+<br>
+![Top Artists](https://spotify.krispowers.dev/top-artists.svg?range=short_term&count=5)
 
 ## Widgets
 
