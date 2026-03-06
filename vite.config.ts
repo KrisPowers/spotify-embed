@@ -6,4 +6,5 @@ export default defineConfig({
   build: {
     outDir: "dist",
   },
+  // Vite automatically copies public/ contents (including _headers) to dist/
 });
