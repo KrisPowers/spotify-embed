@@ -493,3 +493,124 @@
   line-height: 1.7;
   padding-bottom: 16px;
 }
+
+/* ─── Live React card (replaces SVG in preview) ─────────── */
+.liveCard {
+  display: grid;
+  grid-template-columns: 88px 1fr auto;
+  gap: 16px;
+  align-items: center;
+  width: 100%;
+  max-width: 460px;
+}
+
+.liveArt {
+  width: 88px;
+  height: 88px;
+  border-radius: 8px;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+.liveArtEmpty {
+  width: 88px;
+  height: 88px;
+  border-radius: 8px;
+  background: var(--surface-3);
+  flex-shrink: 0;
+}
+
+.liveInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.liveSpotifyLabel {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  color: #1DB954;
+  margin-bottom: 2px;
+}
+
+.liveTrack {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  letter-spacing: -0.2px;
+}
+
+.liveArtists {
+  font-size: 13px;
+  color: var(--text-2);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.liveProgressWrap {
+  margin-top: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.liveProgressTrack {
+  height: 3px;
+  background: #2a2a2a;
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.liveProgressFill {
+  height: 100%;
+  background: linear-gradient(to right, #1DB954, #1ed760);
+  border-radius: 2px;
+  transition: width 1s linear;
+}
+
+.liveTimes {
+  display: flex;
+  justify-content: space-between;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: #555;
+}
+
+/* Animated equalizer bars */
+.liveViz {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  padding-right: 4px;
+}
+
+.liveVizBar {
+  width: 4px;
+  height: 16px;
+  background: #1DB954;
+  border-radius: 2px;
+  animation: vizBounce 1s ease-in-out infinite alternate;
+}
+
+@keyframes vizBounce {
+  0%   { transform: scaleY(0.2); opacity: 0.5; }
+  100% { transform: scaleY(1);   opacity: 1; }
+}
+
+/* Idle card */
+.idleCard {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 13px;
+  color: var(--text-3);
+}

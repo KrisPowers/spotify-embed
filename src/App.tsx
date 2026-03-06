@@ -60,42 +60,109 @@ function StepNumber({ n }: { n: number }) {
 
 type PreviewStatus = "loading" | "playing" | "idle" | "error";
 
-function BadgePreview() {
-  const [blobUrl, setBlobUrl] = useState<string | null>(null);
-  const [status, setStatus] = useState<PreviewStatus>("loading");
+interface TrackState {
+  name: string;
+  artists: string;
+  artUrl: string;
+  progressMs: number;
+  durationMs: number;
+  fetchedAt: number; // performance.now() when we got the data
+}
 
-  const fetchBadge = async () => {
-    setStatus("loading");
+function BadgePreview() {
+  const [status, setStatus] = useState<PreviewStatus>("loading");
+  const [track, setTrack] = useState<TrackState | null>(null);
+  const [displayProgress, setDisplayProgress] = useState(0);
+  
+
+  // Parse the raw SVG text to extract track data so we can animate locally
+  const parseSvg = (svg: string): TrackState | null => {
     try {
-      // ?nocache=1 tells the CF function to respond with no-store headers.
-      // We also add a timestamp so the browser never serves from its own cache.
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(svg, "image/svg+xml");
+
+      const texts = Array.from(doc.querySelectorAll("text")).map(t => t.textContent ?? "");
+      // SVG structure: [0]=SPOTIFY, [1]=track, [2]=artists, [3]=elapsed, [4]=total
+      const elapsed = texts[3] ?? "0:00";
+      const total = texts[4] ?? "0:00";
+
+      const parseTime = (t: string) => {
+        const [m, s] = t.split(":").map(Number);
+        return ((m || 0) * 60 + (s || 0)) * 1000;
+      };
+
+      // Extract image href for album art
+      const img = doc.querySelector("image");
+      const artHref = img?.getAttribute("href") ?? "";
+
+      return {
+        name: texts[1] ?? "",
+        artists: texts[2] ?? "",
+        artUrl: artHref,
+        progressMs: parseTime(elapsed),
+        durationMs: parseTime(total),
+        fetchedAt: performance.now(),
+      };
+    } catch {
+      return null;
+    }
+  };
+
+  // Fetch fresh data from the API every 5 seconds
+  const fetchBadge = async () => {
+    try {
       const res = await fetch(`/now-playing.svg?nocache=1&t=${Date.now()}`, {
         cache: "no-store",
         headers: { "Pragma": "no-cache" },
       });
       if (!res.ok) { setStatus("error"); return; }
       const svg = await res.text();
-      // Revoke previous blob to avoid memory leaks
-      setBlobUrl((prev) => { if (prev) URL.revokeObjectURL(prev); return null; });
-      const blob = new Blob([svg], { type: "image/svg+xml" });
-      const url = URL.createObjectURL(blob);
-      setBlobUrl(url);
-      setStatus(svg.includes("Not playing") ? "idle" : "playing");
+
+      if (svg.includes("Not playing")) {
+        setStatus("idle");
+        setTrack(null);
+        return;
+      }
+
+      const parsed = parseSvg(svg);
+      if (parsed) {
+        setTrack(parsed);
+        setDisplayProgress(parsed.progressMs);
+        setStatus("playing");
+      }
     } catch {
       setStatus("error");
     }
   };
 
+  // Poll API every 5s
   useEffect(() => {
     fetchBadge();
-    const interval = setInterval(fetchBadge, 10000);
+    const interval = setInterval(fetchBadge, 5000);
     return () => clearInterval(interval);
   }, []);
 
-  // Cleanup blob on unmount
+  // Tick the progress bar every second locally — no API calls
   useEffect(() => {
-    return () => { if (blobUrl) URL.revokeObjectURL(blobUrl); };
-  }, [blobUrl]);
+    if (status !== "playing" || !track) return;
+    const ticker = setInterval(() => {
+      setDisplayProgress(() => {
+        const elapsed = performance.now() - track.fetchedAt;
+        const newProgress = track.progressMs + elapsed;
+        return Math.min(newProgress, track.durationMs);
+      });
+    }, 1000);
+    return () => clearInterval(ticker);
+  }, [track, status]);
+
+  const formatTime = (ms: number) => {
+    const s = Math.floor(ms / 1000);
+    return `${Math.floor(s / 60)}:${(s % 60).toString().padStart(2, "0")}`;
+  };
+
+  const progressPct = track && track.durationMs > 0
+    ? Math.min(displayProgress / track.durationMs, 1) * 100
+    : 0;
 
   return (
     <div className={styles.previewWrap}>
@@ -111,13 +178,48 @@ function BadgePreview() {
         </button>
       </div>
       <div className={styles.previewCard}>
-        {blobUrl ? (
-          <img
-            src={blobUrl}
-            alt="Now Playing badge preview"
-            style={{ maxWidth: "100%", borderRadius: "4px", display: "block" }}
-          />
-        ) : (
+        {status === "playing" && track ? (
+          <div className={styles.liveCard}>
+            {/* Album art */}
+            {track.artUrl ? (
+              <img src={track.artUrl} className={styles.liveArt} alt="Album art" />
+            ) : (
+              <div className={styles.liveArtEmpty} />
+            )}
+            {/* Info */}
+            <div className={styles.liveInfo}>
+              <span className={styles.liveSpotifyLabel}>
+                <svg width="10" height="10" viewBox="0 0 24 24" fill="#1DB954"><path d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.66 0 12 0zm5.521 17.34c-.24.359-.66.48-1.021.24-2.82-1.74-6.36-2.101-10.561-1.141-.418.122-.779-.179-.899-.539-.12-.421.18-.78.54-.9 4.56-1.021 8.52-.6 11.64 1.32.42.18.479.659.301 1.02zm1.44-3.3c-.301.42-.841.6-1.262.3-3.239-1.98-8.159-2.58-11.939-1.38-.479.12-1.02-.12-1.14-.6-.12-.48.12-1.021.6-1.141C9.6 9.9 15 10.561 18.72 12.84c.361.181.54.78.241 1.2zm.12-3.36C15.24 8.4 8.82 8.16 5.16 9.301c-.6.179-1.2-.181-1.38-.721-.18-.601.18-1.2.72-1.381 4.26-1.26 11.28-1.02 15.721 1.621.539.3.719 1.02.419 1.56-.299.421-1.02.599-1.559.3z"/></svg>
+                SPOTIFY
+              </span>
+              <div className={styles.liveTrack}>{track.name}</div>
+              <div className={styles.liveArtists}>{track.artists}</div>
+              <div className={styles.liveProgressWrap}>
+                <div className={styles.liveProgressTrack}>
+                  <div
+                    className={styles.liveProgressFill}
+                    style={{ width: `${progressPct}%` }}
+                  />
+                </div>
+                <div className={styles.liveTimes}>
+                  <span>{formatTime(displayProgress)}</span>
+                  <span>{formatTime(track.durationMs)}</span>
+                </div>
+              </div>
+            </div>
+            {/* Animated bars */}
+            <div className={styles.liveViz}>
+              {[1,2,3,4,5].map(i => (
+                <div key={i} className={styles.liveVizBar} style={{ animationDelay: `${i * 0.13}s` }} />
+              ))}
+            </div>
+          </div>
+        ) : status === "idle" ? (
+          <div className={styles.idleCard}>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="#2a2a2a"><path d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.66 0 12 0zm5.521 17.34c-.24.359-.66.48-1.021.24-2.82-1.74-6.36-2.101-10.561-1.141-.418.122-.779-.179-.899-.539-.12-.421.18-.78.54-.9 4.56-1.021 8.52-.6 11.64 1.32.42.18.479.659.301 1.02zm1.44-3.3c-.301.42-.841.6-1.262.3-3.239-1.98-8.159-2.58-11.939-1.38-.479.12-1.02-.12-1.14-.6-.12-.48.12-1.021.6-1.141C9.6 9.9 15 10.561 18.72 12.84c.361.181.54.78.241 1.2zm.12-3.36C15.24 8.4 8.82 8.16 5.16 9.301c-.6.179-1.2-.181-1.38-.721-.18-.601.18-1.2.72-1.381 4.26-1.26 11.28-1.02 15.721 1.621.539.3.719 1.02.419 1.56-.299.421-1.02.599-1.559.3z"/></svg>
+            <span>Not playing anything right now</span>
+          </div>
+        ) : status === "loading" ? (
           <div className={styles.previewSkeleton}>
             <div className={styles.skeletonArt} />
             <div className={styles.skeletonLines}>
@@ -126,6 +228,8 @@ function BadgePreview() {
               <div className={styles.skeletonLine} style={{ width: "80%", height: "4px", marginTop: "12px" }} />
             </div>
           </div>
+        ) : (
+          <span style={{ fontSize: "13px", color: "var(--text-3)" }}>Could not connect to Spotify</span>
         )}
       </div>
     </div>

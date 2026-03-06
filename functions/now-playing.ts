@@ -185,12 +185,12 @@ export const onRequest: PagesFunction<Env> = async (context) => {
   // ?nocache=1 bypasses Cloudflare edge cache for the live preview UI.
   // GitHub Camo hits the plain URL and receives the cached version (good for perf).
   const noCache = url.searchParams.has("nocache");
+  void noCache; // both paths now use no-cache so GitHub/Camo always get fresh data
   const headers = {
     "Content-Type": "image/svg+xml",
-    "Cache-Control": noCache
-      ? "no-store, no-cache, must-revalidate, max-age=0"
-      : "public, s-maxage=60, stale-while-revalidate=30",
-    "Pragma": noCache ? "no-cache" : "cache",
+    "Cache-Control": "no-cache, no-store, must-revalidate, max-age=0",
+    "Pragma": "no-cache",
+    "Expires": "0",
     "Access-Control-Allow-Origin": "*",
   };
 
