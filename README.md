@@ -93,12 +93,3 @@ Your worker will be live at:
 ```markdown
 ![Now Playing](https://spotify-now-playing.<your-subdomain>.workers.dev)
 ```
-
-<<<<<<< HEAD
-This URL works in any GitHub README and updates on every page load.
-=======
-This URL works in any GitHub README and updates on every page load.
-
-### Preview (if I am listening to music)
-![Now Playing](https://now-playing.krispowers.dev/)
->>>>>>> 578a1179fc848dfb7de6ed8a5d0304de427cb664
