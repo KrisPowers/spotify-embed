@@ -2,6 +2,11 @@
 
 A single Cloudflare Worker that serves a setup UI and live SVG badges for your GitHub README.
 
+## Preview (Only shows If I am listening to music):
+![Now Playing](https://spotify.krispowers.dev/now-playing.svg)
+<br>
+![Top Tracks](https://spotify.krispowers.dev/top-tracks.svg?range=short_term&count=5)
+
 ## Widgets
 
 | Badge | Embed URL |
