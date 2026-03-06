@@ -109,6 +109,9 @@ function svgPlaying(
     </rect>`;
   }).join("");
 
+  const remainingSec = Math.max(0, (durationMs - progressMs) / 1000);
+  const animateDur = `${remainingSec.toFixed(1)}s`;
+
   return `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}">
   <defs>
     <style>text { font-family: system-ui, -apple-system, sans-serif; }</style>
@@ -145,11 +148,26 @@ function svgPlaying(
 
   <!-- Progress track -->
   <rect x="164" y="95" width="${barW}" height="3" rx="1.5" fill="#2a2a2a"/>
-  <!-- Progress fill -->
-  <rect x="164" y="95" width="${filledW}" height="3" rx="1.5" fill="url(#bar)"/>
+  <!-- Progress fill animates from current position to end of song -->
+  <rect x="164" y="95" width="${filledW}" height="3" rx="1.5" fill="url(#bar)">
+    <animate
+      attributeName="width"
+      from="${filledW}"
+      to="${barW}"
+      dur="${animateDur}"
+      begin="0s"
+      fill="freeze"
+      calcMode="linear"
+    />
+  </rect>
 
-  <!-- Times -->
-  <text x="164" y="112" font-size="10" fill="#555">${fmtMs(progressMs)}</text>
+  <!-- Elapsed time counts up second by second -->
+  <text x="164" y="112" font-size="10" fill="#555">
+    ${Array.from({ length: Math.ceil(remainingSec) + 1 }, (_, i) => {
+      const ms = Math.min(progressMs + i * 1000, durationMs);
+      return `<tspan visibility="hidden">${fmtMs(ms)}<set attributeName="visibility" to="visible" begin="${i}s" end="${i + 1}s"/></tspan>`;
+    }).join("")}
+  </text>
   <text x="${164 + barW}" y="112" font-size="10" fill="#555" text-anchor="end">${fmtMs(durationMs)}</text>
 </svg>`;
 }

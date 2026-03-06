@@ -92,6 +92,11 @@ function svgPlaying(track: string, artists: string, art: string, progressMs: num
     </rect>`;
   }).join("");
 
+  // Remaining duration in seconds — how long the animation should run from current position
+  const remainingSec = Math.max(0, (durationMs - progressMs) / 1000);
+  // The progress bar animates from filledW → barW over the remaining duration
+  const animateDur = `${remainingSec.toFixed(1)}s`;
+
   return `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}">
   <defs>
     <style>text { font-family: system-ui, -apple-system, sans-serif; }</style>
@@ -115,9 +120,29 @@ function svgPlaying(track: string, artists: string, art: string, progressMs: num
   <text x="164" y="27" font-size="10" fill="#1DB954" font-weight="700" letter-spacing="1.5">SPOTIFY</text>
   <text x="164" y="56" font-size="16" fill="#f0f0f0" font-weight="600">${esc(trunc(track, 36))}</text>
   <text x="164" y="77" font-size="13" fill="#888888">${esc(trunc(artists, 44))}</text>
+
+  <!-- Progress track -->
   <rect x="164" y="95" width="${barW}" height="3" rx="1.5" fill="#2a2a2a"/>
-  <rect x="164" y="95" width="${filledW}" height="3" rx="1.5" fill="url(#bar)"/>
-  <text x="164" y="112" font-size="10" fill="#555">${fmtMs(progressMs)}</text>
+  <!-- Progress fill — animates from current position to end of song -->
+  <rect x="164" y="95" width="${filledW}" height="3" rx="1.5" fill="url(#bar)">
+    <animate
+      attributeName="width"
+      from="${filledW}"
+      to="${barW}"
+      dur="${animateDur}"
+      begin="0s"
+      fill="freeze"
+      calcMode="linear"
+    />
+  </rect>
+
+  <!-- Elapsed time — counts up second by second -->
+  <text x="164" y="112" font-size="10" fill="#555">
+    ${Array.from({ length: Math.ceil(remainingSec) + 1 }, (_, i) => {
+      const ms = Math.min(progressMs + i * 1000, durationMs);
+      return `<tspan visibility="hidden">${fmtMs(ms)}<set attributeName="visibility" to="visible" begin="${i}s" end="${i + 1}s"/></tspan>`;
+    }).join("")}
+  </text>
   <text x="${164 + barW}" y="112" font-size="10" fill="#555" text-anchor="end">${fmtMs(durationMs)}</text>
 </svg>`;
 }
