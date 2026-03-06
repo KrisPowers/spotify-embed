@@ -136,11 +136,11 @@ function svgPlaying(track: string, artists: string, art: string, progressMs: num
     />
   </rect>
 
-  <!-- Elapsed time — counts up second by second -->
-  <text x="164" y="112" font-size="10" fill="#555">
+  <!-- Elapsed time — counts up second by second, fixed x so text never shifts -->
+  <text y="112" font-size="10" fill="#555">
     ${Array.from({ length: Math.ceil(remainingSec) + 1 }, (_, i) => {
       const ms = Math.min(progressMs + i * 1000, durationMs);
-      return `<tspan visibility="hidden">${fmtMs(ms)}<set attributeName="visibility" to="visible" begin="${i}s" end="${i + 1}s"/></tspan>`;
+      return `<tspan x="164" visibility="hidden">${fmtMs(ms)}<set attributeName="visibility" to="visible" begin="${i}s" end="${i + 1}s"/></tspan>`;
     }).join("")}
   </text>
   <text x="${164 + barW}" y="112" font-size="10" fill="#555" text-anchor="end">${fmtMs(durationMs)}</text>
