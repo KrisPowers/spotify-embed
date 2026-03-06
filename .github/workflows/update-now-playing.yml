@@ -19,7 +19,7 @@ jobs:
           curl -s \
             -H "Cache-Control: no-cache" \
             -H "Pragma: no-cache" \
-            "https://spotify-embed.pages.dev/now-playing.svg?t=$(date +%s)" \
+            "https://spotify.krispowers.dev/now-playing.svg?t=$(date +%s)" \
             -o now-playing.svg
 
       - name: Commit if changed
