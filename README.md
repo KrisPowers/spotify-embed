@@ -61,4 +61,4 @@ SPOTIFY_REFRESH_TOKEN=...
 ```
 
 ### Example of the final result: (if I am listening to music.....)
-![Now Playing](https://spotify.krispowers.dev/now-playing.svg)
+![Now Playing](https://camo.githubusercontent.com/2fbeeea6927292a3de16f3ce9d4a1d2311998933cd37391c4b1649ae71455b52/68747470733a2f2f73706f746966792e6b726973706f776572732e6465762f6e6f772d706c6179696e672e737667)
