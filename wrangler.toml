@@ -1,0 +1,11 @@
+name = 'spotify-embed'
+main = "src/index.ts"
+compatibility_date = "2024-01-01"
+
+# Deploy:
+#   npx wrangler deploy
+#
+# Secrets (run each once):
+#   npx wrangler secret put SPOTIFY_CLIENT_ID
+#   npx wrangler secret put SPOTIFY_CLIENT_SECRET
+#   npx wrangler secret put SPOTIFY_REFRESH_TOKEN

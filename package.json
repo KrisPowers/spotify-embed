@@ -1,23 +1,15 @@
 {
-  "name": "spotify-readme-badge",
-  "version": "1.0.0",
-  "description": "Spotify Now Playing badge for GitHub READMEs — Cloudflare Pages",
-  "type": "module",
+  "name": "spotify-readme-worker",
+  "version": "2.0.0",
+  "private": true,
   "scripts": {
-    "dev": "vite",
-    "build": "tsc && vite build",
-    "preview": "vite preview"
-  },
-  "dependencies": {
-    "react": "^18.3.1",
-    "react-dom": "^18.3.1"
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "cf-typegen": "wrangler types"
   },
   "devDependencies": {
     "@cloudflare/workers-types": "^4.20240523.0",
-    "@types/react": "^18.3.3",
-    "@types/react-dom": "^18.3.0",
-    "@vitejs/plugin-react": "^4.3.1",
     "typescript": "^5.5.3",
-    "vite": "^5.3.4"
+    "wrangler": "^3.57.0"
   }
 }
