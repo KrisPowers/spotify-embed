@@ -1,0 +1,32 @@
+name: Update Now Playing
+
+on:
+  schedule:
+    - cron: "* * * * *"  # every minute
+  workflow_dispatch:      # allow manual trigger
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Fetch now-playing SVG
+        run: |
+          curl -s \
+            -H "Cache-Control: no-cache" \
+            -H "Pragma: no-cache" \
+            "https://spotify-embed.pages.dev/now-playing.svg?t=$(date +%s)" \
+            -o now-playing.svg
+
+      - name: Commit if changed
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add now-playing.svg
+          # Only commit if the file actually changed
+          git diff --cached --quiet || git commit -m "chore: update now playing"
+          git push
