@@ -1,10 +1,13 @@
-# 🎵 Spotify Now Playing — GitHub README Badge
+# Spotify Now Playing — GitHub README Badge
 
 A Cloudflare Pages app (Vite + React + TypeScript) that serves a live SVG badge showing your currently playing Spotify track.
 
 ```markdown
 ![Now Playing](https://your-project.pages.dev/now-playing.svg)
 ```
+
+### Preview (if I am listening to music)
+![Now Playing](https://now-playing.krispowers.dev/)
 
 ## Routes
 
@@ -92,6 +95,3 @@ Your worker will be live at:
 ```
 
 This URL works in any GitHub README and updates on every page load.
-
-### Preview (if I am listening to music)
-![Now Playing](https://now-playing.krispowers.dev/)
