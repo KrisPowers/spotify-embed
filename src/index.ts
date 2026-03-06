@@ -1,5 +1,6 @@
 import {
   Env,
+  TimeRange,
   getAccessToken,
   getNowPlaying,
   getTopArtists,
@@ -143,12 +144,12 @@ export default {
         const token = await getAccessToken(env);
         // Spotify's API uses "medium_term" not "mid_term" — map it
         const apiRange = range === "mid_term" ? "medium_term" : range;
-        const artists = await getTopArtists(token, apiRange as Parameters<typeof getTopArtists>[1], count);
+        const artists = await getTopArtists(token, apiRange as TimeRange, count);
 
         const withArt = await Promise.all(
           artists.map(async (a) => ({
             name: a.name,
-            genres: a.genres,
+            genres: a.genres ?? [],
             art: a.images[1]?.url
               ? await fetchImageAsBase64(a.images[1].url)
               : a.images[0]?.url
@@ -171,7 +172,7 @@ export default {
       try {
         const token = await getAccessToken(env);
         const apiRange = range === "mid_term" ? "medium_term" : range;
-        const tracks = await getTopTracks(token, apiRange as Parameters<typeof getTopTracks>[1], count);
+        const tracks = await getTopTracks(token, apiRange as TimeRange, count);
 
         const withArt = await Promise.all(
           tracks.map(async (t) => ({

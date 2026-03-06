@@ -27,7 +27,7 @@ function rangeLabel(range: string): string {
 }
 
 export function svgTopArtists(
-  artists: Array<{ name: string; genres: string[]; art: string }>,
+  artists: Array<{ name: string; genres?: string[]; art: string }>,
   range: string
 ): string {
   const count = artists.length;
@@ -38,7 +38,7 @@ export function svgTopArtists(
     const row = Math.floor(i / cols);
     const x = PAD_X + col * (CARD_W + CARD_GAP);
     const y = PAD_Y + row * (CARD_H + CARD_GAP);
-    const genre = artist.genres[0] ? trunc(artist.genres[0], 12) : "";
+    const genre = artist.genres?.[0] ? trunc(artist.genres[0], 12) : "";
     const name = trunc(artist.name, 11);
     const rank = i + 1;
 

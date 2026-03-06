@@ -20,7 +20,7 @@ export interface SpotifyCurrentlyPlaying {
 
 export interface SpotifyArtist {
   name: string;
-  genres: string[];
+  genres?: string[];
   images: Array<{ url: string; width: number; height: number }>;
   external_urls: { spotify: string };
 }
@@ -35,7 +35,7 @@ export interface SpotifyTrack {
   external_urls: { spotify: string };
 }
 
-export type TimeRange = "short_term" | "mid_term" | "long_term";
+export type TimeRange = "short_term" | "mid_term" | "long_term" | "medium_term";
 
 export async function getAccessToken(env: Env): Promise<string> {
   const credentials = btoa(`${env.SPOTIFY_CLIENT_ID}:${env.SPOTIFY_CLIENT_SECRET}`);
@@ -67,7 +67,7 @@ export async function getNowPlaying(token: string): Promise<SpotifyCurrentlyPlay
 
 export async function getTopArtists(
   token: string,
-  range: TimeRange = "medium_term" as unknown as TimeRange,
+  range: TimeRange = "medium_term",
   limit = 8
 ): Promise<SpotifyArtist[]> {
   const params = new URLSearchParams({
@@ -85,7 +85,7 @@ export async function getTopArtists(
 
 export async function getTopTracks(
   token: string,
-  range: TimeRange = "medium_term" as unknown as TimeRange,
+  range: TimeRange = "medium_term",
   limit = 8
 ): Promise<SpotifyTrack[]> {
   const params = new URLSearchParams({
