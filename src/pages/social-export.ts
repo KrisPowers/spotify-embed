@@ -3,7 +3,7 @@ import { htmlShell } from "./shell.js";
 export function pageSocialExport(origin: string): string {
   const body = `
     <div class="page-header">
-      <h1 class="page-title">Instagram Export</h1>
+      <h1 class="page-title">Social Export</h1>
       <p class="page-subtitle">Generate a styled Spotify summary image and download it as JPG for Instagram Story or Post formats.</p>
     </div>
 
@@ -227,5 +227,5 @@ export function pageSocialExport(origin: string): string {
     </script>
   `;
 
-  return htmlShell("Instagram Export", body, "social-export");
+  return htmlShell("Social Export", body, "social-export");
 }
