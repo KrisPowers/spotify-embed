@@ -39,6 +39,14 @@ export function pageTopTracks(origin: string): string {
     </div>
 
     <div class="section">
+      <div class="section-label">Instagram Export</div>
+      <div class="card">
+        <p class="page-subtitle" style="margin-bottom: 14px;">Generate an Instagram-formatted image from this dataset and download it directly as JPG.</p>
+        <a href="/social-export" class="auth-btn">Open Social Export</a>
+      </div>
+    </div>
+
+    <div class="section">
       <div class="section-label">Embed in your README</div>
       <div class="code-block">
         <pre class="code-pre" id="embed-code">![Top Tracks](${origin}/top-tracks.svg?range=short_term&count=8)</pre>

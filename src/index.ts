@@ -15,11 +15,27 @@ import { NO_CACHE_HEADERS, HTML_HEADERS } from "./utils.js";
 import { svgNowPlaying, svgNowPlayingIdle } from "./svg/now-playing.js";
 import { svgTopArtists, svgTopArtistsError } from "./svg/top-artists.js";
 import { svgTopTracks, svgTopTracksError } from "./svg/top-tracks.js";
+import {
+  SocialDataset,
+  SocialFormat,
+  svgSocialCard,
+  svgSocialCardError,
+} from "./svg/social-card.js";
 
 import { pageNowPlaying } from "./pages/now-playing.js";
 import { pageTopArtists } from "./pages/top-artists.js";
 import { pageTopTracks } from "./pages/top-tracks.js";
 import { pageCallback } from "./pages/callback.js";
+import { pageSocialExport } from "./pages/social-export.js";
+
+function sanitizeDataset(raw: string | null): SocialDataset {
+  return raw === "top-tracks" ? "top-tracks" : "top-artists";
+}
+
+function sanitizeFormat(raw: string | null): SocialFormat {
+  if (raw === "story" || raw === "square" || raw === "portrait") return raw;
+  return "story";
+}
 
 export default {
   async fetch(request: Request, env: Env): Promise<Response> {
@@ -38,6 +54,10 @@ export default {
 
     if (path === "/top-tracks") {
       return new Response(pageTopTracks(origin), { headers: HTML_HEADERS });
+    }
+
+    if (path === "/social-export") {
+      return new Response(pageSocialExport(origin), { headers: HTML_HEADERS });
     }
 
     // ── OAuth flow ───────────────────────────────────────────────────
@@ -190,6 +210,73 @@ export default {
       } catch (err) {
         console.error("top-tracks error:", err);
         return new Response(svgTopTracksError(), { headers: NO_CACHE_HEADERS });
+      }
+    }
+
+    if (path === "/social-card.svg") {
+      const dataset = sanitizeDataset(url.searchParams.get("dataset"));
+      const format = sanitizeFormat(url.searchParams.get("format"));
+      const range = sanitizeRange(url.searchParams.get("range"));
+      const count = sanitizeCount(url.searchParams.get("count"));
+
+      try {
+        const token = await getAccessToken(env);
+        const apiRange = range === "mid_term" ? "medium_term" : range;
+
+        if (dataset === "top-artists") {
+          const artists = await getTopArtists(token, apiRange as TimeRange, count);
+          const items = await Promise.all(
+            artists.map(async (a, i) => ({
+              rank: i + 1,
+              title: a.name,
+              subtitle: a.genres?.[0] || "Spotify Artist",
+              art: a.images[1]?.url
+                ? await fetchImageAsBase64(a.images[1].url)
+                : a.images[0]?.url
+                ? await fetchImageAsBase64(a.images[0].url)
+                : "",
+            }))
+          );
+
+          return new Response(
+            svgSocialCard({
+              dataset,
+              range,
+              format,
+              generatedAt: new Date().toISOString(),
+              items,
+            }),
+            { headers: NO_CACHE_HEADERS }
+          );
+        }
+
+        const tracks = await getTopTracks(token, apiRange as TimeRange, count);
+        const items = await Promise.all(
+          tracks.map(async (t, i) => ({
+            rank: i + 1,
+            title: t.name,
+            subtitle: t.artists.map((a) => a.name).join(", "),
+            art: t.album.images[1]?.url
+              ? await fetchImageAsBase64(t.album.images[1].url)
+              : t.album.images[0]?.url
+              ? await fetchImageAsBase64(t.album.images[0].url)
+              : "",
+          }))
+        );
+
+        return new Response(
+          svgSocialCard({
+            dataset,
+            range,
+            format,
+            generatedAt: new Date().toISOString(),
+            items,
+          }),
+          { headers: NO_CACHE_HEADERS }
+        );
+      } catch (err) {
+        console.error("social-card error:", err);
+        return new Response(svgSocialCardError(format), { headers: NO_CACHE_HEADERS });
       }
     }
 
