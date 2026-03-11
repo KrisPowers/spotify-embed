@@ -99,7 +99,7 @@ export function svgSocialCard(input: SocialCardRenderInput): string {
           ? { cardW: 780, cardH: 1040, cardY: 330, artSize: 430, artYPad: 150, titleYPad: 760, subtitleYPad: 818, badgeYPad: 72, badgeW: 148, badgeH: 70, titleSize: 58, subtitleSize: 33, pulseR1: 320, pulseR2: 250, pulseR3: 186 }
           : format === "portrait"
           ? { cardW: 760, cardH: 860, cardY: 300, artSize: 360, artYPad: 136, titleYPad: 650, subtitleYPad: 702, badgeYPad: 68, badgeW: 140, badgeH: 66, titleSize: 50, subtitleSize: 30, pulseR1: 276, pulseR2: 218, pulseR3: 164 }
-          : { cardW: 760, cardH: 620, cardY: 300, artSize: 270, artYPad: 116, titleYPad: 488, subtitleYPad: 530, badgeYPad: 62, badgeW: 132, badgeH: 62, titleSize: 42, subtitleSize: 28, pulseR1: 220, pulseR2: 175, pulseR3: 136 };
+          : { cardW: 760, cardH: 760, cardY: 220, artSize: 320, artYPad: 156, titleYPad: 610, subtitleYPad: 654, badgeYPad: 62, badgeW: 132, badgeH: 62, titleSize: 42, subtitleSize: 28, pulseR1: 220, pulseR2: 175, pulseR3: 136 };
 
         const cx = (size.width - cfg.cardW) / 2;
         const cy = cfg.cardY;
