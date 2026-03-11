@@ -95,32 +95,38 @@ export function svgSocialCard(input: SocialCardRenderInput): string {
   const hero = items[0];
   const heroCard = hero
     ? (() => {
-        const cardW = format === "story" ? 780 : 720;
-        const cardH = format === "story" ? 980 : 760;
-        const artSize = format === "story" ? 500 : 420;
-        const cx = (size.width - cardW) / 2;
-        const cy = (size.height - cardH) / 2 + 90;
-        const artX = (size.width - artSize) / 2;
-        const artY = cy + 90;
-        const title = trunc(hero.title, format === "story" ? 26 : 24);
-        const subtitle = trunc(hero.subtitle, format === "story" ? 34 : 30);
-        const ringR = format === "story" ? 302 : 252;
+        const cfg = format === "story"
+          ? { cardW: 780, cardH: 1040, cardY: 330, artSize: 430, artYPad: 150, titleYPad: 760, subtitleYPad: 818, badgeYPad: 72, badgeW: 148, badgeH: 70, titleSize: 58, subtitleSize: 33, pulseR1: 320, pulseR2: 250, pulseR3: 186 }
+          : format === "portrait"
+          ? { cardW: 760, cardH: 860, cardY: 300, artSize: 360, artYPad: 136, titleYPad: 650, subtitleYPad: 702, badgeYPad: 68, badgeW: 140, badgeH: 66, titleSize: 50, subtitleSize: 30, pulseR1: 276, pulseR2: 218, pulseR3: 164 }
+          : { cardW: 760, cardH: 620, cardY: 300, artSize: 270, artYPad: 116, titleYPad: 488, subtitleYPad: 530, badgeYPad: 62, badgeW: 132, badgeH: 62, titleSize: 42, subtitleSize: 28, pulseR1: 220, pulseR2: 175, pulseR3: 136 };
+
+        const cx = (size.width - cfg.cardW) / 2;
+        const cy = cfg.cardY;
+        const artX = (size.width - cfg.artSize) / 2;
+        const artY = cy + cfg.artYPad;
+        const pulseX = size.width / 2;
+        const pulseY = artY + cfg.artSize / 2;
+        const title = trunc(hero.title, format === "story" ? 26 : 22);
+        const subtitle = trunc(hero.subtitle, format === "story" ? 36 : 30);
 
         return `
   <g>
-    <rect x="${cx}" y="${cy}" width="${cardW}" height="${cardH}" rx="54" fill="#0f0f0f" stroke="#222" stroke-width="3"/>
-    <circle cx="${size.width / 2}" cy="${artY + artSize / 2}" r="${ringR}" fill="none" stroke="#1DB954" stroke-opacity="0.32" stroke-width="24"/>
+    <rect x="${cx}" y="${cy}" width="${cfg.cardW}" height="${cfg.cardH}" rx="54" fill="#0f0f0f" stroke="#222" stroke-width="3"/>
+    <circle cx="${pulseX}" cy="${pulseY}" r="${cfg.pulseR1}" fill="url(#pulse-a)"/>
+    <circle cx="${pulseX}" cy="${pulseY}" r="${cfg.pulseR2}" fill="url(#pulse-b)"/>
+    <circle cx="${pulseX}" cy="${pulseY}" r="${cfg.pulseR3}" fill="url(#pulse-c)"/>
     <clipPath id="hero-art">
-      <rect x="${artX}" y="${artY}" width="${artSize}" height="${artSize}" rx="40"/>
+      <rect x="${artX}" y="${artY}" width="${cfg.artSize}" height="${cfg.artSize}" rx="40"/>
     </clipPath>
     ${hero.art
-      ? `<image href="${hero.art}" x="${artX}" y="${artY}" width="${artSize}" height="${artSize}" clip-path="url(#hero-art)" preserveAspectRatio="xMidYMid slice"/>`
-      : `<rect x="${artX}" y="${artY}" width="${artSize}" height="${artSize}" rx="40" fill="#1c1c1c"/>`
+      ? `<image href="${hero.art}" x="${artX}" y="${artY}" width="${cfg.artSize}" height="${cfg.artSize}" clip-path="url(#hero-art)" preserveAspectRatio="xMidYMid slice"/>`
+      : `<rect x="${artX}" y="${artY}" width="${cfg.artSize}" height="${cfg.artSize}" rx="40" fill="#1c1c1c"/>`
     }
-    <circle cx="${size.width / 2}" cy="${cy + 60}" r="50" fill="#1DB954"/>
-    <text x="${size.width / 2}" y="${cy + 75}" font-size="52" fill="#060606" text-anchor="middle" font-weight="900">#1</text>
-    <text x="${size.width / 2}" y="${cy + cardH - 110}" font-size="${format === "story" ? 58 : 48}" fill="#f4f4f4" text-anchor="middle" font-weight="800">${esc(title)}</text>
-    <text x="${size.width / 2}" y="${cy + cardH - 60}" font-size="${format === "story" ? 34 : 30}" fill="#949494" text-anchor="middle">${esc(subtitle)}</text>
+    <rect x="${size.width / 2 - cfg.badgeW / 2}" y="${cy + cfg.badgeYPad}" width="${cfg.badgeW}" height="${cfg.badgeH}" rx="30" fill="#1DB954"/>
+    <text x="${size.width / 2}" y="${cy + cfg.badgeYPad + cfg.badgeH - 18}" font-size="44" fill="#060606" text-anchor="middle" font-weight="900">#1</text>
+    <text x="${size.width / 2}" y="${cy + cfg.titleYPad}" font-size="${cfg.titleSize}" fill="#f4f4f4" text-anchor="middle" font-weight="800">${esc(title)}</text>
+    <text x="${size.width / 2}" y="${cy + cfg.subtitleYPad}" font-size="${cfg.subtitleSize}" fill="#949494" text-anchor="middle">${esc(subtitle)}</text>
   </g>`;
       })()
     : "";
@@ -143,6 +149,18 @@ export function svgSocialCard(input: SocialCardRenderInput): string {
     <radialGradient id="glow-b" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(${size.width * 0.14} ${size.height * 0.9}) rotate(90) scale(${size.height * 0.4} ${size.width * 0.45})">
       <stop offset="0%" stop-color="#1ed760" stop-opacity="0.18"/>
       <stop offset="100%" stop-color="#1ed760" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="pulse-a" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#27e56a" stop-opacity="0.34"/>
+      <stop offset="100%" stop-color="#27e56a" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="pulse-b" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#1DB954" stop-opacity="0.26"/>
+      <stop offset="100%" stop-color="#1DB954" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="pulse-c" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#1DB954" stop-opacity="0.18"/>
+      <stop offset="100%" stop-color="#1DB954" stop-opacity="0"/>
     </radialGradient>
   </defs>
 
