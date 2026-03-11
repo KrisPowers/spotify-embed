@@ -37,6 +37,11 @@ function sanitizeFormat(raw: string | null): SocialFormat {
   return "story";
 }
 
+function clampSocialCount(count: number, format: SocialFormat): number {
+  const max = format === "story" ? 7 : 5;
+  return Math.min(count, max);
+}
+
 export default {
   async fetch(request: Request, env: Env): Promise<Response> {
     const url = new URL(request.url);
@@ -217,7 +222,7 @@ export default {
       const dataset = sanitizeDataset(url.searchParams.get("dataset"));
       const format = sanitizeFormat(url.searchParams.get("format"));
       const range = sanitizeRange(url.searchParams.get("range"));
-      const count = sanitizeCount(url.searchParams.get("count"));
+      const count = clampSocialCount(sanitizeCount(url.searchParams.get("count")), format);
 
       try {
         const token = await getAccessToken(env);

@@ -31,7 +31,7 @@ export function pageSocialExport(origin: string): string {
           <div class="control-group">
             <div class="control-label">Items</div>
             <div class="control-row">
-              ${[3, 4, 5, 6, 7, 8].map(n =>
+              ${[1, 2, 3, 4, 5, 6, 7].map(n =>
                 `<button class="ctrl-btn${n === 6 ? " active" : ""}" data-count="${n}" onclick="setCount(this)">${n}</button>`
               ).join("")}
             </div>
@@ -71,6 +71,27 @@ export function pageSocialExport(origin: string): string {
       let currentCount = 6;
       let currentFormat = 'story';
 
+      function maxCountForFormat(format) {
+        return format === 'story' ? 7 : 5;
+      }
+
+      function syncCountControls() {
+        const maxCount = maxCountForFormat(currentFormat);
+        document.querySelectorAll('[data-count]').forEach(btn => {
+          const value = Number(btn.dataset.count || '0');
+          btn.disabled = value > maxCount;
+          btn.style.opacity = btn.disabled ? '0.45' : '1';
+          btn.style.cursor = btn.disabled ? 'not-allowed' : 'pointer';
+        });
+
+        if (currentCount > maxCount) {
+          currentCount = maxCount;
+          document.querySelectorAll('[data-count]').forEach(b => b.classList.remove('active'));
+          const active = document.querySelector('[data-count=\"' + String(maxCount) + '\"]');
+          if (active) active.classList.add('active');
+        }
+      }
+
       function getSvgUrl() {
         const params = new URLSearchParams({
           dataset: currentDataset,
@@ -109,6 +130,7 @@ export function pageSocialExport(origin: string): string {
       }
 
       function setCount(btn) {
+        if (btn.disabled) return;
         document.querySelectorAll('[data-count]').forEach(b => b.classList.remove('active'));
         btn.classList.add('active');
         currentCount = Number(btn.dataset.count || '6');
@@ -119,6 +141,7 @@ export function pageSocialExport(origin: string): string {
         document.querySelectorAll('[data-format]').forEach(b => b.classList.remove('active'));
         btn.classList.add('active');
         currentFormat = btn.dataset.format;
+        syncCountControls();
         updatePreview();
       }
 
@@ -199,6 +222,7 @@ export function pageSocialExport(origin: string): string {
         }
       }
 
+      syncCountControls();
       updatePreview();
     </script>
   `;
