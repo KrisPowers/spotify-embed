@@ -160,6 +160,8 @@ export function htmlShell(title: string, body: string, activePage: string): stri
     /* Preview */
     .preview-wrap { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r); padding: 24px; display: flex; align-items: center; justify-content: center; min-height: 80px; position: relative; overflow: hidden; }
     .preview-wrap img { max-width: 100%; border-radius: 4px; display: block; }
+    .social-preview-wrap { min-height: 460px; padding: 18px; }
+    .social-preview-wrap img { max-height: 680px; width: auto; object-fit: contain; border: 1px solid #242424; background: #080808; }
 
     /* Divider */
     hr { border: none; border-top: 1px solid var(--border); margin: 28px 0; }
@@ -173,6 +175,31 @@ export function htmlShell(title: string, body: string, activePage: string): stri
     .build-row:last-child { border-bottom: none; }
     .build-key { font-size: 12px; color: var(--text-3); min-width: 130px; flex-shrink: 0; }
     .build-val { font-family: var(--mono); font-size: 12px; color: var(--green); }
+
+    @media (max-width: 980px) {
+      .layout { flex-direction: column; }
+      .sidebar {
+        width: 100%;
+        position: static;
+        height: auto;
+        border-right: 0;
+        border-bottom: 1px solid var(--border);
+        padding: 18px 0 14px;
+      }
+      .sidebar-section { display: flex; flex-wrap: wrap; gap: 6px; }
+      .sidebar-label { width: 100%; }
+      .nav-item { margin-bottom: 0; }
+      .main {
+        max-width: 100%;
+        padding: 28px 20px 56px;
+      }
+      .control-row { flex-wrap: wrap; }
+      .auth-btn { width: 100%; justify-content: center; }
+      .social-preview-wrap img {
+        max-height: 520px;
+        width: min(100%, 360px);
+      }
+    }
   </style>
 </head>
 <body>
@@ -200,6 +227,10 @@ export function htmlShell(title: string, body: string, activePage: string): stri
         <a href="/top-tracks" class="nav-item ${activePage === 'top-tracks' ? 'active' : ''}">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
           Top Tracks
+        </a>
+        <a href="/social-export" class="nav-item ${activePage === 'social-export' ? 'active' : ''}">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
+          Social Export
         </a>
       </div>
       <div class="sidebar-section" style="margin-top: 16px;">

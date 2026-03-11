@@ -39,6 +39,14 @@ export function pageTopArtists(origin: string): string {
     </div>
 
     <div class="section">
+      <div class="section-label">Instagram Export</div>
+      <div class="card">
+        <p class="page-subtitle" style="margin-bottom: 14px;">Turn this data into an Instagram-ready image (Story 9:16, Post 1:1, or Post 4:5) and download as JPG.</p>
+        <a href="/social-export" class="auth-btn">Open Social Export</a>
+      </div>
+    </div>
+
+    <div class="section">
       <div class="section-label">Embed in your README</div>
       <div class="code-block">
         <pre class="code-pre" id="embed-code">![Top Artists](${origin}/top-artists.svg?range=short_term&count=8)</pre>
