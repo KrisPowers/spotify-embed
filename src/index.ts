@@ -127,7 +127,9 @@ export default {
     if (path === "/now-playing.svg" || path === "/now-playing-badge") {
       try {
         const token = await getAccessToken(env);
+        const nowPlayingFetchStartedMs = Date.now();
         const playing = await getNowPlaying(token);
+        const nowPlayingFetchEndedMs = Date.now();
 
         if (!playing || !playing.is_playing || !playing.item) {
           return new Response(svgNowPlayingIdle(), { headers: NO_CACHE_HEADERS });
@@ -138,6 +140,8 @@ export default {
         const imageUrl = item.album.images[1]?.url ?? item.album.images[0]?.url ?? "";
         const art = imageUrl ? await fetchImageAsBase64(imageUrl) : "";
         const renderMs = Date.now();
+        const spotifySampleMs = Math.round((nowPlayingFetchStartedMs + nowPlayingFetchEndedMs) / 2);
+        const clientRenderLeadMs = 300;
         const apiProgressMs = Math.min(
           item.duration_ms,
           Math.max(
@@ -145,7 +149,10 @@ export default {
             progress_ms ?? 0
           )
         );
-        let correctedProgressMs = apiProgressMs;
+        let correctedProgressMs = Math.min(
+          item.duration_ms,
+          apiProgressMs + (playing.is_playing ? Math.max(0, renderMs - spotifySampleMs + clientRenderLeadMs) : 0)
+        );
         const trackKey = item.id ?? `${item.name}:${item.duration_ms}`;
 
         // Use API progress as truth and only smooth small jitter around expected progression.
@@ -155,11 +162,11 @@ export default {
             lastNowPlayingState.progressMs + Math.max(0, renderMs - lastNowPlayingState.observedAtMs)
           );
           const behindByMs = expectedProgressMs - correctedProgressMs;
-          if (behindByMs > 0 && behindByMs <= 4000) {
+          if (behindByMs > 0 && behindByMs <= 2500) {
             correctedProgressMs = expectedProgressMs;
           }
           const aheadByMs = correctedProgressMs - expectedProgressMs;
-          if (aheadByMs > 4000) {
+          if (aheadByMs > 2500) {
             correctedProgressMs = expectedProgressMs;
           }
         }
