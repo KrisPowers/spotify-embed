@@ -15,17 +15,11 @@ export function pageNowPlaying(origin: string): string {
       <div class="preview-wrap" id="preview-wrap">
         <img id="preview-img" src="${embedUrl}?t=${Date.now()}" alt="Now Playing preview"/>
       </div>
-      <div style="display:flex;justify-content:flex-end;margin-top:8px;">
+      <div style="display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-top:8px;">
         <button class="ctrl-btn" onclick="refreshPreview()">↻ Refresh</button>
-      </div>
-    </div>
-
-    <div class="section">
-      <div class="section-label">Copy Embed</div>
-      <div class="card">
-        <div style="display:flex;gap:10px;flex-wrap:wrap;">
-          <button class="auth-btn" style="border:0;cursor:pointer;" onclick="copyEmbed('markdown', this)">Copy Markdown</button>
-          <button class="auth-btn" style="background:#1a1a1a;color:#e0e0e0;border:1px solid #2a2a2a;cursor:pointer;" onclick="copyEmbed('html', this)">Copy HTML</button>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end;">
+          <button class="ctrl-btn" onclick="copyEmbed('markdown', this)">Copy Markdown</button>
+          <button class="ctrl-btn" onclick="copyEmbed('html', this)">Copy HTML</button>
         </div>
       </div>
     </div>
