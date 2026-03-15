@@ -21,20 +21,11 @@ export function pageNowPlaying(origin: string): string {
     </div>
 
     <div class="section">
-      <div class="section-label">Embed in your README</div>
-      <div class="code-block">
-        <pre class="code-pre">![Now Playing](${embedUrl})</pre>
-        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
-      </div>
-    </div>
-
-    <div class="section">
-      <div class="section-label">Website Embed</div>
+      <div class="section-label">Copy Embed</div>
       <div class="card">
-        <p class="page-subtitle" style="margin-bottom: 10px;">Website (HTML)</p>
-        <div class="code-block">
-          <pre class="code-pre">&lt;img src="${embedUrl}" alt="Now Playing on Spotify" loading="lazy" /&gt;</pre>
-          <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;">
+          <button class="auth-btn" style="border:0;cursor:pointer;" onclick="copyEmbed('markdown', this)">Copy Markdown</button>
+          <button class="auth-btn" style="background:#1a1a1a;color:#e0e0e0;border:1px solid #2a2a2a;cursor:pointer;" onclick="copyEmbed('html', this)">Copy HTML</button>
         </div>
       </div>
     </div>
@@ -43,6 +34,8 @@ export function pageNowPlaying(origin: string): string {
 
     <script>
       let lastNowPlayingKey = null;
+      const markdownEmbed = '![Now Playing](${embedUrl})';
+      const htmlEmbed = '<img src="${embedUrl}" alt="Now Playing on Spotify" loading="lazy" />';
 
       function refreshPreview() {
         const img = document.getElementById('preview-img');
@@ -50,6 +43,19 @@ export function pageNowPlaying(origin: string): string {
         const preload = new Image();
         preload.onload = () => { img.src = nextUrl; };
         preload.src = nextUrl;
+      }
+
+      async function copyEmbed(type, btn) {
+        const content = type === 'html' ? htmlEmbed : markdownEmbed;
+        const originalLabel = btn.textContent;
+        try {
+          await navigator.clipboard.writeText(content);
+          btn.textContent = 'Copied';
+          setTimeout(() => { btn.textContent = originalLabel; }, 1300);
+        } catch {
+          btn.textContent = 'Copy failed';
+          setTimeout(() => { btn.textContent = originalLabel; }, 1600);
+        }
       }
 
       async function pollNowPlayingState() {
