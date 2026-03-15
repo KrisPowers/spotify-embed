@@ -162,19 +162,20 @@ export default {
         );
         const trackKey = item.id ?? `${item.name}:${item.duration_ms}`;
 
-        // Use API progress as truth and only smooth small jitter around expected progression.
+        // Smooth only tiny jitter; allow real seek back/forward changes from Spotify.
         if (lastNowPlayingState && lastNowPlayingState.trackKey === trackKey) {
           const expectedProgressMs = Math.min(
             item.duration_ms,
             lastNowPlayingState.progressMs + Math.max(0, renderMs - lastNowPlayingState.observedAtMs)
           );
-          const behindByMs = expectedProgressMs - correctedProgressMs;
-          if (behindByMs > 0 && behindByMs <= 2500) {
+          const backwardJitterWindowMs = 2500;
+          const maxForwardDriftMs = 10000;
+          const driftMs = correctedProgressMs - expectedProgressMs;
+
+          if (driftMs < 0 && Math.abs(driftMs) <= backwardJitterWindowMs) {
             correctedProgressMs = expectedProgressMs;
-          }
-          const aheadByMs = correctedProgressMs - expectedProgressMs;
-          if (aheadByMs > 2500) {
-            correctedProgressMs = expectedProgressMs;
+          } else if (driftMs > maxForwardDriftMs) {
+            correctedProgressMs = Math.min(item.duration_ms, expectedProgressMs + maxForwardDriftMs);
           }
         }
 
