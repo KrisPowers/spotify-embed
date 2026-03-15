@@ -28,6 +28,12 @@ import { pageTopTracks } from "./pages/top-tracks.js";
 import { pageCallback } from "./pages/callback.js";
 import { pageSocialExport } from "./pages/social-export.js";
 
+let lastNowPlayingState: {
+  trackKey: string;
+  progressMs: number;
+  observedAtMs: number;
+} | null = null;
+
 function sanitizeDataset(raw: string | null): SocialDataset {
   return raw === "top-tracks" ? "top-tracks" : "top-artists";
 }
@@ -128,18 +134,35 @@ export default {
         }
 
         const { item, progress_ms } = playing;
-        const nowMs = Date.now();
-        const snapshotMs = typeof playing.timestamp === "number" ? playing.timestamp : nowMs;
-        const correctedProgressMs = Math.min(
-          item.duration_ms,
-          Math.max(
-            0,
-            (progress_ms ?? 0) + (playing.is_playing ? Math.max(0, nowMs - snapshotMs) : 0)
-          )
-        );
+        const snapshotMs = typeof playing.timestamp === "number" ? playing.timestamp : Date.now();
         const artists = item.artists.map((a) => a.name).join(", ");
         const imageUrl = item.album.images[1]?.url ?? item.album.images[0]?.url ?? "";
         const art = imageUrl ? await fetchImageAsBase64(imageUrl) : "";
+        const renderMs = Date.now();
+        let correctedProgressMs = Math.min(
+          item.duration_ms,
+          Math.max(
+            0,
+            (progress_ms ?? 0) + (playing.is_playing ? Math.max(0, renderMs - snapshotMs) : 0)
+          )
+        );
+        const trackKey = item.id ?? `${item.name}:${item.duration_ms}`;
+
+        // Guard against stale API snapshots causing visible backward jumps on refresh.
+        if (lastNowPlayingState && lastNowPlayingState.trackKey === trackKey) {
+          const expectedProgressMs = Math.min(
+            item.duration_ms,
+            lastNowPlayingState.progressMs + Math.max(0, renderMs - lastNowPlayingState.observedAtMs)
+          );
+          const isLikelyStale = correctedProgressMs + 1200 < expectedProgressMs;
+          if (isLikelyStale) correctedProgressMs = expectedProgressMs;
+        }
+
+        lastNowPlayingState = {
+          trackKey,
+          progressMs: correctedProgressMs,
+          observedAtMs: renderMs,
+        };
 
         return new Response(
           svgNowPlaying(item.name, artists, item.album?.name ?? "", art, correctedProgressMs, item.duration_ms),

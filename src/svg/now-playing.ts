@@ -94,14 +94,12 @@ export function svgNowPlaying(
     <rect width="${W}" height="${H}" fill="url(#shade-edge)"/>
     <rect width="${W}" height="112" fill="url(#shade-top-band)"/>
 
-    <g transform="translate(26 46)">
-      <g transform="translate(0 -9)">
-        <circle cx="9" cy="9" r="9" fill="#1DB954"/>
-        <path d="M5.1 7.4c2.8-.8 5.6-.5 8 .8" fill="none" stroke="#07150d" stroke-width="1.35" stroke-linecap="round"/>
-        <path d="M5.7 10c2.2-.6 4.6-.5 6.6.6" fill="none" stroke="#07150d" stroke-width="1.2" stroke-linecap="round"/>
-        <path d="M6.2 12.3c1.8-.5 3.5-.4 4.8.4" fill="none" stroke="#07150d" stroke-width="1.05" stroke-linecap="round"/>
-      </g>
-      <text x="28" y="0" font-size="18" fill="#f5f5f5" font-weight="700" dominant-baseline="middle">Now Playing</text>
+    <g>
+      <circle cx="36" cy="43" r="9" fill="#1DB954"/>
+      <path d="M32.1 41.4c2.8-.8 5.6-.5 8 .8" fill="none" stroke="#07150d" stroke-width="1.35" stroke-linecap="round"/>
+      <path d="M32.7 44c2.2-.6 4.6-.5 6.6.6" fill="none" stroke="#07150d" stroke-width="1.2" stroke-linecap="round"/>
+      <path d="M33.2 46.3c1.8-.5 3.5-.4 4.8.4" fill="none" stroke="#07150d" stroke-width="1.05" stroke-linecap="round"/>
+      <text x="55" y="43" font-size="18" fill="#f5f5f5" font-weight="700" dominant-baseline="middle">Now Playing</text>
     </g>
     <text x="28" y="83" font-size="12.8" fill="#ffffffde">
       Now playing <tspan font-weight="700" fill="#ffffff">${displayTrack}</tspan> by <tspan font-weight="700" fill="#ffffff">${displayArtists}</tspan>${displayAlbum ? ` from the album <tspan font-weight="700" fill="#ffffff">${displayAlbum}</tspan>` : ""}

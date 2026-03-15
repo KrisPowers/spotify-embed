@@ -70,9 +70,12 @@ export function pageNowPlaying(origin: string): string {
     <script>
       function refreshPreview() {
         const img = document.getElementById('preview-img');
-        img.src = '${embedUrl}?t=' + Date.now();
+        const nextUrl = '${embedUrl}?t=' + Date.now();
+        const preload = new Image();
+        preload.onload = () => { img.src = nextUrl; };
+        preload.src = nextUrl;
       }
-      setInterval(refreshPreview, 10000);
+      setInterval(refreshPreview, 30000);
     </script>
   `;
 
