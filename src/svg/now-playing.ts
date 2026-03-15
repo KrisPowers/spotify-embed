@@ -43,7 +43,7 @@ export function svgNowPlaying(
   <defs>
     <style>text { ${SVG_FONT} }</style>
     <clipPath id="card-clip"><rect x="0" y="0" width="${W}" height="${H}" rx="16"/></clipPath>
-    <clipPath id="cover-clip"><rect x="${coverX}" y="${coverY}" width="${coverSize}" height="${coverSize}"/></clipPath>
+    <clipPath id="cover-clip"><rect x="${coverX}" y="${coverY}" width="${coverSize}" height="${coverSize}" rx="4"/></clipPath>
     <filter id="bg-blur" x="-30%" y="-30%" width="160%" height="160%">
       <feGaussianBlur stdDeviation="18"/>
     </filter>
@@ -99,7 +99,7 @@ export function svgNowPlaying(
       <path d="M31.2 41.1c3.4-1 6.8-.7 9.8 1" fill="none" stroke="#07150d" stroke-width="1.55" stroke-linecap="round"/>
       <path d="M31.9 44.2c2.8-.8 5.8-.6 8.1.8" fill="none" stroke="#07150d" stroke-width="1.35" stroke-linecap="round"/>
       <path d="M32.6 47.1c2.2-.6 4.3-.5 6 .5" fill="none" stroke="#07150d" stroke-width="1.2" stroke-linecap="round"/>
-      <text x="60" y="43" font-size="17" fill="#f5f5f5" font-weight="700" dominant-baseline="middle">Now Playing</text>
+      <text x="60" y="45" font-size="17" fill="#f5f5f5" font-weight="700" dominant-baseline="middle">Now Playing</text>
     </g>
     <text x="28" y="83" font-size="12.8" fill="#ffffffde">
       Now playing <tspan font-weight="700" fill="#ffffff">${displayTrack}</tspan> by <tspan font-weight="700" fill="#ffffff">${displayArtists}</tspan>${displayAlbum ? ` from the album <tspan font-weight="700" fill="#ffffff">${displayAlbum}</tspan>` : ""}
@@ -117,12 +117,12 @@ export function svgNowPlaying(
     </g>
 
     <g filter="url(#cover-shadow)">
-      <rect x="${coverX}" y="${coverY}" width="${coverSize}" height="${coverSize}" fill="#161616"/>
+      <rect x="${coverX}" y="${coverY}" width="${coverSize}" height="${coverSize}" rx="4" fill="#161616"/>
       ${art
         ? `<image href="${art}" x="${coverX}" y="${coverY}" width="${coverSize}" height="${coverSize}" clip-path="url(#cover-clip)" preserveAspectRatio="xMidYMid slice"/>`
         : ""
       }
-      <rect x="${coverX}" y="${coverY}" width="${coverSize}" height="${coverSize}" fill="none" stroke="#ffffff24" stroke-width="1"/>
+      <rect x="${coverX}" y="${coverY}" width="${coverSize}" height="${coverSize}" rx="4" fill="none" stroke="#ffffff24" stroke-width="1"/>
     </g>
   </g>
 
