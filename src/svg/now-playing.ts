@@ -9,15 +9,16 @@ export function svgNowPlaying(
   durationMs: number
 ): string {
   const W = 640, H = 360;
-  const coverSize = 136;
+  const coverSize = 164;
   const coverX = Math.round(W / 2 - coverSize / 2);
-  const coverY = 210;
+  const coverY = 262;
   const diskCx = Math.round(W / 2);
-  const diskCy = 226;
-  const diskR = 68;
+  const diskCy = 270;
+  const diskR = 90;
   const barX = 28;
-  const barY = 347;
+  const barY = 110;
   const barH = 3;
+  const timerY = 103;
   const prog = durationMs > 0 ? Math.min(progressMs / durationMs, 1) : 0;
   const barW = W - barX * 2;
   const filledW = Math.round(barW * prog);
@@ -33,7 +34,7 @@ export function svgNowPlaying(
     return `<tspan x="${barX}" visibility="hidden">${fmtMs(ms)}<set attributeName="visibility" to="visible" begin="${i}s" end="${i + 1}s"/></tspan>`;
   }).join("");
 
-  const vinylRings = [14, 22, 30, 38, 46, 54, 62].map((r, i) => {
+  const vinylRings = [16, 28, 40, 52, 64, 76, 86].map((r, i) => {
     const opacity = (0.1 - i * 0.011).toFixed(3);
     return `<circle cx="${diskCx}" cy="${diskCy}" r="${r}" fill="none" stroke="#d4d8df" stroke-opacity="${opacity}" stroke-width="1"/>`;
   }).join("");
@@ -42,7 +43,7 @@ export function svgNowPlaying(
   <defs>
     <style>text { ${SVG_FONT} }</style>
     <clipPath id="card-clip"><rect x="0" y="0" width="${W}" height="${H}" rx="16"/></clipPath>
-    <clipPath id="cover-clip"><rect x="${coverX}" y="${coverY}" width="${coverSize}" height="${coverSize}" rx="2"/></clipPath>
+    <clipPath id="cover-clip"><rect x="${coverX}" y="${coverY}" width="${coverSize}" height="${coverSize}"/></clipPath>
     <filter id="bg-blur" x="-30%" y="-30%" width="160%" height="160%">
       <feGaussianBlur stdDeviation="22"/>
     </filter>
@@ -93,13 +94,15 @@ export function svgNowPlaying(
     <rect width="${W}" height="${H}" fill="url(#shade-edge)"/>
     <rect width="${W}" height="112" fill="url(#shade-top-band)"/>
 
-    <g transform="translate(28 34)">
-      <circle cx="9" cy="9" r="9" fill="#1DB954"/>
-      <path d="M5.1 7.4c2.8-.8 5.6-.5 8 .8" fill="none" stroke="#07150d" stroke-width="1.35" stroke-linecap="round"/>
-      <path d="M5.7 10c2.2-.6 4.6-.5 6.6.6" fill="none" stroke="#07150d" stroke-width="1.2" stroke-linecap="round"/>
-      <path d="M6.2 12.3c1.8-.5 3.5-.4 4.8.4" fill="none" stroke="#07150d" stroke-width="1.05" stroke-linecap="round"/>
+    <g transform="translate(26 46)">
+      <g transform="translate(0 -9)">
+        <circle cx="9" cy="9" r="9" fill="#1DB954"/>
+        <path d="M5.1 7.4c2.8-.8 5.6-.5 8 .8" fill="none" stroke="#07150d" stroke-width="1.35" stroke-linecap="round"/>
+        <path d="M5.7 10c2.2-.6 4.6-.5 6.6.6" fill="none" stroke="#07150d" stroke-width="1.2" stroke-linecap="round"/>
+        <path d="M6.2 12.3c1.8-.5 3.5-.4 4.8.4" fill="none" stroke="#07150d" stroke-width="1.05" stroke-linecap="round"/>
+      </g>
+      <text x="28" y="0" font-size="18" fill="#f5f5f5" font-weight="700" dominant-baseline="middle">Now Playing</text>
     </g>
-    <text x="56" y="52" font-size="18" fill="#f5f5f5" font-weight="700">Now Playing</text>
     <text x="28" y="83" font-size="12.8" fill="#ffffffde">
       Now playing <tspan font-weight="700" fill="#ffffff">${displayTrack}</tspan> by <tspan font-weight="700" fill="#ffffff">${displayArtists}</tspan>${displayAlbum ? ` from the album <tspan font-weight="700" fill="#ffffff">${displayAlbum}</tspan>` : ""}
     </text>
@@ -109,19 +112,19 @@ export function svgNowPlaying(
         <circle cx="${diskCx}" cy="${diskCy}" r="${diskR}" fill="url(#vinyl-fill)"/>
         <circle cx="${diskCx}" cy="${diskCy}" r="${diskR - 2}" fill="none" stroke="#ededed" stroke-opacity="0.18" stroke-width="1"/>
         ${vinylRings}
-        <circle cx="${diskCx}" cy="${diskCy}" r="20" fill="#333841"/>
-        <circle cx="${diskCx}" cy="${diskCy}" r="7.2" fill="#0f1013"/>
+        <circle cx="${diskCx}" cy="${diskCy}" r="22" fill="#333841"/>
+        <circle cx="${diskCx}" cy="${diskCy}" r="8" fill="#0f1013"/>
         <circle cx="${diskCx}" cy="${diskCy}" r="3" fill="#06070a"/>
       </g>
     </g>
 
     <g filter="url(#cover-shadow)">
-      <rect x="${coverX}" y="${coverY}" width="${coverSize}" height="${coverSize}" rx="2" fill="#161616"/>
+      <rect x="${coverX}" y="${coverY}" width="${coverSize}" height="${coverSize}" fill="#161616"/>
       ${art
         ? `<image href="${art}" x="${coverX}" y="${coverY}" width="${coverSize}" height="${coverSize}" clip-path="url(#cover-clip)" preserveAspectRatio="xMidYMid slice"/>`
         : ""
       }
-      <rect x="${coverX}" y="${coverY}" width="${coverSize}" height="${coverSize}" rx="2" fill="none" stroke="#ffffff24" stroke-width="1"/>
+      <rect x="${coverX}" y="${coverY}" width="${coverSize}" height="${coverSize}" fill="none" stroke="#ffffff24" stroke-width="1"/>
     </g>
   </g>
 
@@ -130,8 +133,8 @@ export function svgNowPlaying(
   <rect x="${barX}" y="${barY}" width="${filledW}" height="${barH}" rx="1.5" fill="url(#bar)">
     <animate attributeName="width" from="${filledW}" to="${barW}" dur="${animateDur}" begin="0s" fill="freeze" calcMode="linear"/>
   </rect>
-  <text y="341" font-size="10" fill="#d4d4d4">${timerTspans}</text>
-  <text x="${barX + barW}" y="341" font-size="10" fill="#d4d4d4" text-anchor="end">${fmtMs(durationMs)}</text>
+  <text y="${timerY}" font-size="10" fill="#d4d4d4">${timerTspans}</text>
+  <text x="${barX + barW}" y="${timerY}" font-size="10" fill="#d4d4d4" text-anchor="end">${fmtMs(durationMs)}</text>
 </svg>`;
 }
 
