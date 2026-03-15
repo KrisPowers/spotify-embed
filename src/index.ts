@@ -148,14 +148,16 @@ export default {
         );
         const trackKey = item.id ?? `${item.name}:${item.duration_ms}`;
 
-        // Guard against stale API snapshots causing visible backward jumps on refresh.
+        // Smooth tiny refresh jitter, but never force large forward jumps.
         if (lastNowPlayingState && lastNowPlayingState.trackKey === trackKey) {
           const expectedProgressMs = Math.min(
             item.duration_ms,
             lastNowPlayingState.progressMs + Math.max(0, renderMs - lastNowPlayingState.observedAtMs)
           );
-          const isLikelyStale = correctedProgressMs + 1200 < expectedProgressMs;
-          if (isLikelyStale) correctedProgressMs = expectedProgressMs;
+          const behindByMs = expectedProgressMs - correctedProgressMs;
+          if (behindByMs > 0 && behindByMs <= 4000) {
+            correctedProgressMs = expectedProgressMs;
+          }
         }
 
         lastNowPlayingState = {

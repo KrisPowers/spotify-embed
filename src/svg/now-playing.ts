@@ -11,9 +11,9 @@ export function svgNowPlaying(
   const W = 640, H = 360;
   const coverSize = 156;
   const coverX = Math.round(W / 2 - coverSize / 2);
-  const coverY = 194;
+  const coverY = 219;
   const diskCx = Math.round(W / 2);
-  const diskCy = 226;
+  const diskCy = 241;
   const diskR = 72;
   const barX = 28;
   const barY = 110;
@@ -45,7 +45,7 @@ export function svgNowPlaying(
     <clipPath id="card-clip"><rect x="0" y="0" width="${W}" height="${H}" rx="16"/></clipPath>
     <clipPath id="cover-clip"><rect x="${coverX}" y="${coverY}" width="${coverSize}" height="${coverSize}"/></clipPath>
     <filter id="bg-blur" x="-30%" y="-30%" width="160%" height="160%">
-      <feGaussianBlur stdDeviation="22"/>
+      <feGaussianBlur stdDeviation="18"/>
     </filter>
     <filter id="disk-shadow" x="-40%" y="-40%" width="180%" height="180%">
       <feDropShadow dx="0" dy="5" stdDeviation="6" flood-color="#000" flood-opacity="0.5"/>
@@ -95,11 +95,11 @@ export function svgNowPlaying(
     <rect width="${W}" height="112" fill="url(#shade-top-band)"/>
 
     <g>
-      <circle cx="36" cy="43" r="9" fill="#1DB954"/>
-      <path d="M32.1 41.4c2.8-.8 5.6-.5 8 .8" fill="none" stroke="#07150d" stroke-width="1.35" stroke-linecap="round"/>
-      <path d="M32.7 44c2.2-.6 4.6-.5 6.6.6" fill="none" stroke="#07150d" stroke-width="1.2" stroke-linecap="round"/>
-      <path d="M33.2 46.3c1.8-.5 3.5-.4 4.8.4" fill="none" stroke="#07150d" stroke-width="1.05" stroke-linecap="round"/>
-      <text x="55" y="43" font-size="18" fill="#f5f5f5" font-weight="700" dominant-baseline="middle">Now Playing</text>
+      <circle cx="36" cy="43" r="11" fill="#1DB954"/>
+      <path d="M31.2 41.1c3.4-1 6.8-.7 9.8 1" fill="none" stroke="#07150d" stroke-width="1.55" stroke-linecap="round"/>
+      <path d="M31.9 44.2c2.8-.8 5.8-.6 8.1.8" fill="none" stroke="#07150d" stroke-width="1.35" stroke-linecap="round"/>
+      <path d="M32.6 47.1c2.2-.6 4.3-.5 6 .5" fill="none" stroke="#07150d" stroke-width="1.2" stroke-linecap="round"/>
+      <text x="60" y="43" font-size="17" fill="#f5f5f5" font-weight="700" dominant-baseline="middle">Now Playing</text>
     </g>
     <text x="28" y="83" font-size="12.8" fill="#ffffffde">
       Now playing <tspan font-weight="700" fill="#ffffff">${displayTrack}</tspan> by <tspan font-weight="700" fill="#ffffff">${displayArtists}</tspan>${displayAlbum ? ` from the album <tspan font-weight="700" fill="#ffffff">${displayAlbum}</tspan>` : ""}
