@@ -128,12 +128,21 @@ export default {
         }
 
         const { item, progress_ms } = playing;
+        const nowMs = Date.now();
+        const snapshotMs = typeof playing.timestamp === "number" ? playing.timestamp : nowMs;
+        const correctedProgressMs = Math.min(
+          item.duration_ms,
+          Math.max(
+            0,
+            (progress_ms ?? 0) + (playing.is_playing ? Math.max(0, nowMs - snapshotMs) : 0)
+          )
+        );
         const artists = item.artists.map((a) => a.name).join(", ");
         const imageUrl = item.album.images[1]?.url ?? item.album.images[0]?.url ?? "";
         const art = imageUrl ? await fetchImageAsBase64(imageUrl) : "";
 
         return new Response(
-          svgNowPlaying(item.name, artists, item.album?.name ?? "", art, progress_ms ?? 0, item.duration_ms),
+          svgNowPlaying(item.name, artists, item.album?.name ?? "", art, correctedProgressMs, item.duration_ms),
           { headers: NO_CACHE_HEADERS }
         );
       } catch (err) {

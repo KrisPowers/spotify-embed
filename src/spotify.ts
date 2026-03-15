@@ -6,6 +6,7 @@ export interface Env {
 
 export interface SpotifyCurrentlyPlaying {
   is_playing: boolean;
+  timestamp?: number;
   progress_ms: number | null;
   item: {
     name: string;

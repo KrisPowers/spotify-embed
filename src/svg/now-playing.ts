@@ -133,8 +133,8 @@ export function svgNowPlaying(
   <rect x="${barX}" y="${barY}" width="${filledW}" height="${barH}" rx="1.5" fill="url(#bar)">
     <animate attributeName="width" from="${filledW}" to="${barW}" dur="${animateDur}" begin="0s" fill="freeze" calcMode="linear"/>
   </rect>
-  <text y="${timerY}" font-size="10" fill="#d4d4d4">${timerTspans}</text>
-  <text x="${barX + barW}" y="${timerY}" font-size="10" fill="#d4d4d4" text-anchor="end">${fmtMs(durationMs)}</text>
+  <text y="${timerY}" font-size="11.5" fill="#d4d4d4">${timerTspans}</text>
+  <text x="${barX + barW}" y="${timerY}" font-size="11.5" fill="#d4d4d4" text-anchor="end">${fmtMs(durationMs)}</text>
 </svg>`;
 }
 
