@@ -104,8 +104,16 @@ export async function getTopTracks(
 export async function fetchImageAsBase64(url: string): Promise<string> {
   try {
     const res = await fetch(url);
+    if (!res.ok) return "";
     const buf = await res.arrayBuffer();
-    const b64 = btoa(String.fromCharCode(...new Uint8Array(buf)));
+    const bytes = new Uint8Array(buf);
+    let binary = "";
+    const chunkSize = 0x8000;
+    for (let i = 0; i < bytes.length; i += chunkSize) {
+      const chunk = bytes.subarray(i, i + chunkSize);
+      binary += String.fromCharCode(...chunk);
+    }
+    const b64 = btoa(binary);
     const mime = res.headers.get("content-type") ?? "image/jpeg";
     return `data:${mime};base64,${b64}`;
   } catch {
