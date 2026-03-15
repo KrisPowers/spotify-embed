@@ -23,6 +23,7 @@ import {
 } from "./svg/social-card.js";
 
 import { pageNowPlaying } from "./pages/now-playing.js";
+import { pageGettingSetup } from "./pages/getting-setup.js";
 import { pageTopArtists } from "./pages/top-artists.js";
 import { pageTopTracks } from "./pages/top-tracks.js";
 import { pageCallback } from "./pages/callback.js";
@@ -64,6 +65,10 @@ export default {
     // ── Setup UI pages ───────────────────────────────────────────────
     if (path === "/" || path === "/now-playing") {
       return new Response(pageNowPlaying(origin), { headers: HTML_HEADERS });
+    }
+
+    if (path === "/getting-setup") {
+      return new Response(pageGettingSetup(origin), { headers: HTML_HEADERS });
     }
 
     if (path === "/top-artists") {
