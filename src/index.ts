@@ -134,21 +134,21 @@ export default {
         }
 
         const { item, progress_ms } = playing;
-        const snapshotMs = typeof playing.timestamp === "number" ? playing.timestamp : Date.now();
         const artists = item.artists.map((a) => a.name).join(", ");
         const imageUrl = item.album.images[1]?.url ?? item.album.images[0]?.url ?? "";
         const art = imageUrl ? await fetchImageAsBase64(imageUrl) : "";
         const renderMs = Date.now();
-        let correctedProgressMs = Math.min(
+        const apiProgressMs = Math.min(
           item.duration_ms,
           Math.max(
             0,
-            (progress_ms ?? 0) + (playing.is_playing ? Math.max(0, renderMs - snapshotMs) : 0)
+            progress_ms ?? 0
           )
         );
+        let correctedProgressMs = apiProgressMs;
         const trackKey = item.id ?? `${item.name}:${item.duration_ms}`;
 
-        // Smooth tiny refresh jitter, but never force large forward jumps.
+        // Use API progress as truth and only smooth small jitter around expected progression.
         if (lastNowPlayingState && lastNowPlayingState.trackKey === trackKey) {
           const expectedProgressMs = Math.min(
             item.duration_ms,
@@ -156,6 +156,10 @@ export default {
           );
           const behindByMs = expectedProgressMs - correctedProgressMs;
           if (behindByMs > 0 && behindByMs <= 4000) {
+            correctedProgressMs = expectedProgressMs;
+          }
+          const aheadByMs = correctedProgressMs - expectedProgressMs;
+          if (aheadByMs > 4000) {
             correctedProgressMs = expectedProgressMs;
           }
         }
