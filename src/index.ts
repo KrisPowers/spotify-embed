@@ -28,6 +28,13 @@ import { pageTopTracks } from "./pages/top-tracks.js";
 import { pageCallback } from "./pages/callback.js";
 import { pageSocialExport } from "./pages/social-export.js";
 
+const JSON_NO_CACHE_HEADERS: Record<string, string> = {
+  "Content-Type": "application/json; charset=utf-8",
+  "Cache-Control": "no-cache, no-store, must-revalidate, max-age=0",
+  "Pragma": "no-cache",
+  "Expires": "0",
+};
+
 let lastNowPlayingState: {
   trackKey: string;
   progressMs: number;
@@ -187,7 +194,33 @@ export default {
       }
     }
 
-    // Debug endpoint — visit /debug to see token + API status
+    // State + debug endpoints
+    if (path === "/now-playing-state.json") {
+      try {
+        const token = await getAccessToken(env);
+        const playing = await getNowPlaying(token);
+
+        if (!playing || !playing.is_playing || !playing.item) {
+          return new Response(
+            JSON.stringify({ isPlaying: false, trackKey: null }),
+            { headers: JSON_NO_CACHE_HEADERS }
+          );
+        }
+
+        const { item } = playing;
+        const trackKey = item.id ?? `${item.name}:${item.duration_ms}`;
+        return new Response(
+          JSON.stringify({ isPlaying: true, trackKey }),
+          { headers: JSON_NO_CACHE_HEADERS }
+        );
+      } catch {
+        return new Response(
+          JSON.stringify({ isPlaying: false, trackKey: null }),
+          { headers: JSON_NO_CACHE_HEADERS }
+        );
+      }
+    }
+
     if (path === "/debug") {
       try {
         const token = await getAccessToken(env);

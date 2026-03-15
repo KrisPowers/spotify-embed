@@ -2,6 +2,7 @@ import { htmlShell } from "./shell.js";
 
 export function pageNowPlaying(origin: string): string {
   const embedUrl = `${origin}/now-playing.svg`;
+  const stateUrl = `${origin}/now-playing-state.json`;
 
   const body = `
     <div class="page-header">
@@ -68,6 +69,8 @@ export function pageNowPlaying(origin: string): string {
     <p class="footer-note">The progress bar and elapsed timer animate in real time using SVG SMIL — no JavaScript needed in the badge itself.</p>
 
     <script>
+      let lastNowPlayingKey = null;
+
       function refreshPreview() {
         const img = document.getElementById('preview-img');
         const nextUrl = '${embedUrl}?t=' + Date.now();
@@ -75,7 +78,28 @@ export function pageNowPlaying(origin: string): string {
         preload.onload = () => { img.src = nextUrl; };
         preload.src = nextUrl;
       }
-      setInterval(refreshPreview, 30000);
+
+      async function pollNowPlayingState() {
+        try {
+          const res = await fetch('${stateUrl}?t=' + Date.now(), { cache: 'no-store' });
+          if (!res.ok) return;
+          const state = await res.json();
+          const nextKey = state && state.isPlaying && state.trackKey ? 'playing:' + state.trackKey : 'idle';
+
+          if (lastNowPlayingKey === null) {
+            lastNowPlayingKey = nextKey;
+            return;
+          }
+
+          if (nextKey !== lastNowPlayingKey) {
+            lastNowPlayingKey = nextKey;
+            refreshPreview();
+          }
+        } catch {}
+      }
+
+      pollNowPlayingState();
+      setInterval(pollNowPlayingState, 10000);
     </script>
   `;
 
