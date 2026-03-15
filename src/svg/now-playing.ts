@@ -9,12 +9,12 @@ export function svgNowPlaying(
   durationMs: number
 ): string {
   const W = 640, H = 360;
-  const coverSize = 164;
+  const coverSize = 156;
   const coverX = Math.round(W / 2 - coverSize / 2);
-  const coverY = 262;
+  const coverY = 194;
   const diskCx = Math.round(W / 2);
-  const diskCy = 270;
-  const diskR = 90;
+  const diskCy = 226;
+  const diskR = 72;
   const barX = 28;
   const barY = 110;
   const barH = 3;
@@ -34,7 +34,7 @@ export function svgNowPlaying(
     return `<tspan x="${barX}" visibility="hidden">${fmtMs(ms)}<set attributeName="visibility" to="visible" begin="${i}s" end="${i + 1}s"/></tspan>`;
   }).join("");
 
-  const vinylRings = [16, 28, 40, 52, 64, 76, 86].map((r, i) => {
+  const vinylRings = [14, 24, 34, 44, 54, 64, 70].map((r, i) => {
     const opacity = (0.1 - i * 0.011).toFixed(3);
     return `<circle cx="${diskCx}" cy="${diskCy}" r="${r}" fill="none" stroke="#d4d8df" stroke-opacity="${opacity}" stroke-width="1"/>`;
   }).join("");
@@ -112,8 +112,8 @@ export function svgNowPlaying(
         <circle cx="${diskCx}" cy="${diskCy}" r="${diskR}" fill="url(#vinyl-fill)"/>
         <circle cx="${diskCx}" cy="${diskCy}" r="${diskR - 2}" fill="none" stroke="#ededed" stroke-opacity="0.18" stroke-width="1"/>
         ${vinylRings}
-        <circle cx="${diskCx}" cy="${diskCy}" r="22" fill="#333841"/>
-        <circle cx="${diskCx}" cy="${diskCy}" r="8" fill="#0f1013"/>
+        <circle cx="${diskCx}" cy="${diskCy}" r="18" fill="#333841"/>
+        <circle cx="${diskCx}" cy="${diskCy}" r="6.4" fill="#0f1013"/>
         <circle cx="${diskCx}" cy="${diskCy}" r="3" fill="#06070a"/>
       </g>
     </g>
