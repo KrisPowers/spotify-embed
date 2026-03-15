@@ -3,79 +3,147 @@ import { esc, trunc, fmtMs, SVG_FONT } from "../utils.js";
 export function svgNowPlaying(
   track: string,
   artists: string,
+  album: string,
   art: string,
   progressMs: number,
   durationMs: number
 ): string {
-  const W = 480, H = 130;
+  const W = 640, H = 360;
+  const coverSize = 168;
+  const coverX = Math.round(W / 2 - coverSize / 2);
+  const coverY = 235;
+  const diskCx = Math.round(W / 2);
+  const diskCy = 248;
+  const diskR = 102;
   const prog = durationMs > 0 ? Math.min(progressMs / durationMs, 1) : 0;
-  const barW = 296;
+  const barW = W - 56;
   const filledW = Math.round(barW * prog);
   const remainingSec = Math.max(0, (durationMs - progressMs) / 1000);
-  const animateDur = `${remainingSec.toFixed(1)}s`;
+  const animateDur = `${Math.max(0.1, remainingSec).toFixed(1)}s`;
 
-  const vizBars = [
-    { h: 8, x: 118 }, { h: 14, x: 126 }, { h: 10, x: 134 }, { h: 18, x: 142 }, { h: 12, x: 150 },
-  ];
-  const vizSvg = vizBars.map(({ h, x }, i) => {
-    const delay = (i * 0.13).toFixed(2);
-    return `<rect x="${x}" y="${65 - h / 2}" width="5" height="${h}" rx="2.5" fill="#1DB954">
-      <animate attributeName="height" values="${h};${Math.max(3, h * 0.3)};${h}" dur="1s" begin="${delay}s" repeatCount="indefinite"/>
-      <animate attributeName="y" values="${65 - h / 2};${65 - Math.max(3, h * 0.3) / 2};${65 - h / 2}" dur="1s" begin="${delay}s" repeatCount="indefinite"/>
-    </rect>`;
-  }).join("");
+  const displayTrack = esc(trunc(track, 28));
+  const displayArtists = esc(trunc(artists, 30));
+  const displayAlbum = esc(trunc(album, 22));
 
   const timerTspans = Array.from({ length: Math.ceil(remainingSec) + 1 }, (_, i) => {
     const ms = Math.min(progressMs + i * 1000, durationMs);
-    return `<tspan x="164" visibility="hidden">${fmtMs(ms)}<set attributeName="visibility" to="visible" begin="${i}s" end="${i + 1}s"/></tspan>`;
+    return `<tspan x="28" visibility="hidden">${fmtMs(ms)}<set attributeName="visibility" to="visible" begin="${i}s" end="${i + 1}s"/></tspan>`;
+  }).join("");
+
+  const vinylRings = [17, 29, 41, 53, 66, 79, 91].map((r, i) => {
+    const opacity = (0.14 - i * 0.012).toFixed(3);
+    return `<circle cx="${diskCx}" cy="${diskCy}" r="${r}" fill="none" stroke="#d8d8d8" stroke-opacity="${opacity}" stroke-width="1"/>`;
   }).join("");
 
   return `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}">
   <defs>
     <style>text { ${SVG_FONT} }</style>
-    <clipPath id="art"><rect x="16" y="16" width="88" height="88" rx="8"/></clipPath>
-    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0%" stop-color="#0e0e0e"/>
-      <stop offset="100%" stop-color="#161616"/>
+    <clipPath id="card-clip"><rect x="0" y="0" width="${W}" height="${H}" rx="16"/></clipPath>
+    <clipPath id="cover-clip"><rect x="${coverX}" y="${coverY}" width="${coverSize}" height="${coverSize}" rx="10"/></clipPath>
+    <filter id="bg-blur" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="24"/>
+    </filter>
+    <filter id="disk-shadow" x="-40%" y="-40%" width="180%" height="180%">
+      <feDropShadow dx="0" dy="8" stdDeviation="10" flood-color="#000" flood-opacity="0.6"/>
+    </filter>
+    <filter id="cover-shadow" x="-40%" y="-40%" width="180%" height="180%">
+      <feDropShadow dx="0" dy="10" stdDeviation="12" flood-color="#000" flood-opacity="0.65"/>
+    </filter>
+    <linearGradient id="base-bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#090909"/>
+      <stop offset="100%" stop-color="#050505"/>
     </linearGradient>
+    <linearGradient id="shade-top" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#000" stop-opacity="0.52"/>
+      <stop offset="100%" stop-color="#000" stop-opacity="0"/>
+    </linearGradient>
+    <linearGradient id="shade-bottom" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#000" stop-opacity="0.06"/>
+      <stop offset="100%" stop-color="#000" stop-opacity="0.82"/>
+    </linearGradient>
+    <radialGradient id="vignette" cx="50%" cy="45%" r="68%">
+      <stop offset="60%" stop-color="#000" stop-opacity="0"/>
+      <stop offset="100%" stop-color="#000" stop-opacity="0.62"/>
+    </radialGradient>
+    <radialGradient id="vinyl-fill" cx="32%" cy="28%" r="78%">
+      <stop offset="0%" stop-color="#8f939a"/>
+      <stop offset="35%" stop-color="#535760"/>
+      <stop offset="72%" stop-color="#2f343d"/>
+      <stop offset="100%" stop-color="#22262d"/>
+    </radialGradient>
     <linearGradient id="bar" x1="0" y1="0" x2="1" y2="0">
       <stop offset="0%" stop-color="#1DB954"/>
       <stop offset="100%" stop-color="#1ed760"/>
     </linearGradient>
   </defs>
-  <rect width="${W}" height="${H}" rx="14" fill="url(#bg)"/>
-  <rect width="${W}" height="${H}" rx="14" fill="none" stroke="#ffffff08" stroke-width="1"/>
-  ${art
-    ? `<image href="${art}" x="16" y="16" width="88" height="88" clip-path="url(#art)" preserveAspectRatio="xMidYMid slice"/>`
-    : `<rect x="16" y="16" width="88" height="88" rx="8" fill="#1a1a1a"/>`
-  }
-  ${vizSvg}
-  <text x="164" y="27" font-size="10" fill="#1DB954" font-weight="700" letter-spacing="1.5">SPOTIFY</text>
-  <text x="164" y="56" font-size="16" fill="#f0f0f0" font-weight="600">${esc(trunc(track, 36))}</text>
-  <text x="164" y="77" font-size="13" fill="#888888">${esc(trunc(artists, 44))}</text>
-  <rect x="164" y="95" width="${barW}" height="3" rx="1.5" fill="#2a2a2a"/>
-  <rect x="164" y="95" width="${filledW}" height="3" rx="1.5" fill="url(#bar)">
+
+  <g clip-path="url(#card-clip)">
+    <rect width="${W}" height="${H}" fill="url(#base-bg)"/>
+    ${art
+      ? `<image href="${art}" x="-42" y="-92" width="${W + 84}" height="${H + 184}" preserveAspectRatio="xMidYMid slice" filter="url(#bg-blur)" opacity="0.66"/>`
+      : ""
+    }
+    ${art
+      ? `<image href="${art}" x="0" y="-26" width="${W}" height="${H + 52}" preserveAspectRatio="xMidYMid slice" opacity="0.14"/>`
+      : ""
+    }
+    <rect width="${W}" height="${H}" fill="url(#shade-top)"/>
+    <rect width="${W}" height="${H}" fill="url(#shade-bottom)"/>
+    <rect width="${W}" height="${H}" fill="url(#vignette)"/>
+
+    <g transform="translate(26 27)">
+      <circle cx="11" cy="11" r="11" fill="#1DB954"/>
+      <path d="M6.2 9.1c3.4-1 6.8-.7 9.8 1" fill="none" stroke="#07150d" stroke-width="1.6" stroke-linecap="round"/>
+      <path d="M6.9 12.2c2.8-.8 5.8-.6 8.1.8" fill="none" stroke="#07150d" stroke-width="1.4" stroke-linecap="round"/>
+      <path d="M7.6 15.1c2.2-.6 4.3-.5 6 .5" fill="none" stroke="#07150d" stroke-width="1.25" stroke-linecap="round"/>
+    </g>
+    <text x="58" y="44" font-size="38" fill="#f5f5f5" font-weight="700">Last Played</text>
+    <text x="28" y="79" font-size="13.5" fill="#dadada">
+      I recently listened to <tspan font-weight="700" fill="#ffffff">${displayTrack}</tspan> by <tspan font-weight="700" fill="#ffffff">${displayArtists}</tspan>${displayAlbum ? ` from the album <tspan font-weight="700" fill="#ffffff">${displayAlbum}</tspan>` : ""}
+    </text>
+
+    <g filter="url(#disk-shadow)">
+      <g>
+        <animateTransform attributeName="transform" type="rotate" from="0 ${diskCx} ${diskCy}" to="360 ${diskCx} ${diskCy}" dur="18s" repeatCount="indefinite"/>
+        <circle cx="${diskCx}" cy="${diskCy}" r="${diskR}" fill="url(#vinyl-fill)"/>
+        <circle cx="${diskCx}" cy="${diskCy}" r="${diskR - 4}" fill="none" stroke="#f4f4f4" stroke-opacity="0.2" stroke-width="1.2"/>
+        ${vinylRings}
+        <circle cx="${diskCx}" cy="${diskCy}" r="29" fill="#30343a"/>
+        <circle cx="${diskCx}" cy="${diskCy}" r="11" fill="#0f1013"/>
+        <circle cx="${diskCx}" cy="${diskCy}" r="3.6" fill="#040506"/>
+      </g>
+    </g>
+
+    <g filter="url(#cover-shadow)">
+      <rect x="${coverX}" y="${coverY}" width="${coverSize}" height="${coverSize}" rx="10" fill="#161616"/>
+      ${art
+        ? `<image href="${art}" x="${coverX}" y="${coverY}" width="${coverSize}" height="${coverSize}" clip-path="url(#cover-clip)" preserveAspectRatio="xMidYMid slice"/>`
+        : ""
+      }
+      <rect x="${coverX}" y="${coverY}" width="${coverSize}" height="${coverSize}" rx="10" fill="none" stroke="#ffffff36" stroke-width="1.1"/>
+    </g>
+  </g>
+
+  <rect width="${W}" height="${H}" rx="16" fill="none" stroke="#ffffff18" stroke-width="1"/>
+  <rect x="28" y="321" width="${barW}" height="4" rx="2" fill="#ffffff2a"/>
+  <rect x="28" y="321" width="${filledW}" height="4" rx="2" fill="url(#bar)">
     <animate attributeName="width" from="${filledW}" to="${barW}" dur="${animateDur}" begin="0s" fill="freeze" calcMode="linear"/>
   </rect>
-  <text y="112" font-size="10" fill="#555">${timerTspans}</text>
-  <text x="${164 + barW}" y="112" font-size="10" fill="#555" text-anchor="end">${fmtMs(durationMs)}</text>
+  <text y="313" font-size="11" fill="#d5d5d5">${timerTspans}</text>
+  <text x="${28 + barW}" y="313" font-size="11" fill="#d5d5d5" text-anchor="end">${fmtMs(durationMs)}</text>
 </svg>`;
 }
 
 export function svgNowPlayingIdle(): string {
-  return `<svg xmlns="http://www.w3.org/2000/svg" width="480" height="72" viewBox="0 0 480 72">
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="640" height="120" viewBox="0 0 640 120">
   <defs><style>text { ${SVG_FONT} }</style></defs>
-  <rect width="480" height="72" rx="12" fill="#0e0e0e"/>
-  <rect width="480" height="72" rx="12" fill="none" stroke="#ffffff06" stroke-width="1"/>
-  <svg x="18" y="22" width="22" height="22" viewBox="0 0 24 24" fill="#2a2a2a">
-    <path d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.66 0 12 0zm5.521 17.34c-.24.359-.66.48-1.021.24-2.82-1.74-6.36-2.101-10.561-1.141-.418.122-.779-.179-.899-.539-.12-.421.18-.78.54-.9 4.56-1.021 8.52-.6 11.64 1.32.42.18.479.659.301 1.02zm1.44-3.3c-.301.42-.841.6-1.262.3-3.239-1.98-8.159-2.58-11.939-1.38-.479.12-1.02-.12-1.14-.6-.12-.48.12-1.021.6-1.141C9.6 9.9 15 10.561 18.72 12.84c.361.181.54.78.241 1.2zm.12-3.36C15.24 8.4 8.82 8.16 5.16 9.301c-.6.179-1.2-.181-1.38-.721-.18-.601.18-1.2.72-1.381 4.26-1.26 11.28-1.02 15.721 1.621.539.3.719 1.02.419 1.56-.299.421-1.02.599-1.559.3z"/>
-  </svg>
-  <rect x="50" y="28" width="4" height="16" rx="2" fill="#1e1e1e"/>
-  <rect x="57" y="31" width="4" height="10" rx="2" fill="#1e1e1e"/>
-  <rect x="64" y="26" width="4" height="20" rx="2" fill="#1e1e1e"/>
-  <rect x="71" y="30" width="4" height="12" rx="2" fill="#1e1e1e"/>
-  <rect x="78" y="28" width="4" height="16" rx="2" fill="#1e1e1e"/>
-  <text x="96" y="34" font-size="13" fill="#3a3a3a" font-weight="600">Not playing anything right now</text>
-  <text x="96" y="52" font-size="11" fill="#2a2a2a">Spotify is quiet</text>
+  <rect width="640" height="120" rx="16" fill="#090909"/>
+  <rect width="640" height="120" rx="16" fill="none" stroke="#ffffff12" stroke-width="1"/>
+  <circle cx="42" cy="42" r="11" fill="#1DB954"/>
+  <path d="M37.2 40.1c3.4-1 6.8-.7 9.8 1" fill="none" stroke="#07150d" stroke-width="1.6" stroke-linecap="round"/>
+  <path d="M37.9 43.2c2.8-.8 5.8-.6 8.1.8" fill="none" stroke="#07150d" stroke-width="1.4" stroke-linecap="round"/>
+  <path d="M38.6 46.1c2.2-.6 4.3-.5 6 .5" fill="none" stroke="#07150d" stroke-width="1.25" stroke-linecap="round"/>
+  <text x="64" y="46" font-size="22" fill="#ececec" font-weight="700">Last Played</text>
+  <text x="28" y="80" font-size="14" fill="#888">Not playing anything right now. Start a track in Spotify to update this card.</text>
 </svg>`;
 }

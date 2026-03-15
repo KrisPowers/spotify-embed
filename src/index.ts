@@ -133,7 +133,7 @@ export default {
         const art = imageUrl ? await fetchImageAsBase64(imageUrl) : "";
 
         return new Response(
-          svgNowPlaying(item.name, artists, art, progress_ms ?? 0, item.duration_ms),
+          svgNowPlaying(item.name, artists, item.album?.name ?? "", art, progress_ms ?? 0, item.duration_ms),
           { headers: NO_CACHE_HEADERS }
         );
       } catch (err) {
