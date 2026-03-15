@@ -2,6 +2,7 @@ import { htmlShell } from "./shell.js";
 
 export function pageNowPlaying(origin: string): string {
   const embedUrl = `${origin}/now-playing.svg`;
+  const stateUrl = `${origin}/now-playing-state.json`;
 
   const body = `
     <div class="page-header">
@@ -24,6 +25,17 @@ export function pageNowPlaying(origin: string): string {
       <div class="code-block">
         <pre class="code-pre">![Now Playing](${embedUrl})</pre>
         <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-label">Website Embed</div>
+      <div class="card">
+        <p class="page-subtitle" style="margin-bottom: 10px;">Website (HTML)</p>
+        <div class="code-block">
+          <pre class="code-pre">&lt;img src="${embedUrl}" alt="Now Playing on Spotify" loading="lazy" /&gt;</pre>
+          <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        </div>
       </div>
     </div>
 
@@ -68,11 +80,37 @@ export function pageNowPlaying(origin: string): string {
     <p class="footer-note">The progress bar and elapsed timer animate in real time using SVG SMIL — no JavaScript needed in the badge itself.</p>
 
     <script>
+      let lastNowPlayingKey = null;
+
       function refreshPreview() {
         const img = document.getElementById('preview-img');
-        img.src = '${embedUrl}?t=' + Date.now();
+        const nextUrl = '${embedUrl}?t=' + Date.now();
+        const preload = new Image();
+        preload.onload = () => { img.src = nextUrl; };
+        preload.src = nextUrl;
       }
-      setInterval(refreshPreview, 10000);
+
+      async function pollNowPlayingState() {
+        try {
+          const res = await fetch('${stateUrl}?t=' + Date.now(), { cache: 'no-store' });
+          if (!res.ok) return;
+          const state = await res.json();
+          const nextKey = state && state.isPlaying && state.trackKey ? 'playing:' + state.trackKey : 'idle';
+
+          if (lastNowPlayingKey === null) {
+            lastNowPlayingKey = nextKey;
+            return;
+          }
+
+          if (nextKey !== lastNowPlayingKey) {
+            lastNowPlayingKey = nextKey;
+            refreshPreview();
+          }
+        } catch {}
+      }
+
+      pollNowPlayingState();
+      setInterval(pollNowPlayingState, 10000);
     </script>
   `;
 
