@@ -29,16 +29,11 @@ export function pageNowPlaying(origin: string): string {
     </div>
 
     <div class="section">
-      <div class="section-label">Website &amp; Email Embed</div>
+      <div class="section-label">Website Embed</div>
       <div class="card">
         <p class="page-subtitle" style="margin-bottom: 10px;">Website (HTML)</p>
-        <div class="code-block" style="margin-bottom: 14px;">
-          <pre class="code-pre">&lt;img src="${embedUrl}" alt="Now Playing on Spotify" loading="lazy" /&gt;</pre>
-          <button class="copy-btn" onclick="copyCode(this)">Copy</button>
-        </div>
-        <p class="page-subtitle" style="margin-bottom: 10px;">Email Signature (HTML)</p>
         <div class="code-block">
-          <pre class="code-pre">&lt;img src="${embedUrl}" alt="Now Playing on Spotify" width="320" style="display:block;border:0;outline:none;text-decoration:none;" /&gt;</pre>
+          <pre class="code-pre">&lt;img src="${embedUrl}" alt="Now Playing on Spotify" loading="lazy" /&gt;</pre>
           <button class="copy-btn" onclick="copyCode(this)">Copy</button>
         </div>
       </div>
