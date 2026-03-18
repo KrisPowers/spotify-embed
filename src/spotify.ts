@@ -4,10 +4,16 @@ export interface Env {
   SPOTIFY_REFRESH_TOKEN: string;
 }
 
+const IMAGE_CACHE_TTL_MS = 5 * 60 * 1000;
+const IMAGE_CACHE_MAX = 64;
+const imageCache = new Map<string, { data: string; expiresAt: number }>();
+
 export interface SpotifyCurrentlyPlaying {
   is_playing: boolean;
+  timestamp?: number;
   progress_ms: number | null;
   item: {
+    id?: string;
     name: string;
     duration_ms: number;
     artists: Array<{ name: string }>;
@@ -103,11 +109,30 @@ export async function getTopTracks(
 
 export async function fetchImageAsBase64(url: string): Promise<string> {
   try {
+    const cached = imageCache.get(url);
+    if (cached && cached.expiresAt > Date.now()) return cached.data;
+
     const res = await fetch(url);
+    if (!res.ok) return "";
     const buf = await res.arrayBuffer();
-    const b64 = btoa(String.fromCharCode(...new Uint8Array(buf)));
+    const bytes = new Uint8Array(buf);
+    let binary = "";
+    const chunkSize = 0x8000;
+    for (let i = 0; i < bytes.length; i += chunkSize) {
+      const chunk = bytes.subarray(i, i + chunkSize);
+      binary += String.fromCharCode(...chunk);
+    }
+    const b64 = btoa(binary);
     const mime = res.headers.get("content-type") ?? "image/jpeg";
-    return `data:${mime};base64,${b64}`;
+    const data = `data:${mime};base64,${b64}`;
+    imageCache.set(url, { data, expiresAt: Date.now() + IMAGE_CACHE_TTL_MS });
+
+    if (imageCache.size > IMAGE_CACHE_MAX) {
+      const firstKey = imageCache.keys().next().value as string | undefined;
+      if (firstKey) imageCache.delete(firstKey);
+    }
+
+    return data;
   } catch {
     return "";
   }

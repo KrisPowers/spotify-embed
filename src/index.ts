@@ -23,10 +23,24 @@ import {
 } from "./svg/social-card.js";
 
 import { pageNowPlaying } from "./pages/now-playing.js";
+import { pageGettingSetup } from "./pages/getting-setup.js";
 import { pageTopArtists } from "./pages/top-artists.js";
 import { pageTopTracks } from "./pages/top-tracks.js";
 import { pageCallback } from "./pages/callback.js";
 import { pageSocialExport } from "./pages/social-export.js";
+
+const JSON_NO_CACHE_HEADERS: Record<string, string> = {
+  "Content-Type": "application/json; charset=utf-8",
+  "Cache-Control": "no-cache, no-store, must-revalidate, max-age=0",
+  "Pragma": "no-cache",
+  "Expires": "0",
+};
+
+let lastNowPlayingState: {
+  trackKey: string;
+  progressMs: number;
+  observedAtMs: number;
+} | null = null;
 
 function sanitizeDataset(raw: string | null): SocialDataset {
   return raw === "top-tracks" ? "top-tracks" : "top-artists";
@@ -51,6 +65,10 @@ export default {
     // ── Setup UI pages ───────────────────────────────────────────────
     if (path === "/" || path === "/now-playing") {
       return new Response(pageNowPlaying(origin), { headers: HTML_HEADERS });
+    }
+
+    if (path === "/getting-setup") {
+      return new Response(pageGettingSetup(origin), { headers: HTML_HEADERS });
     }
 
     if (path === "/top-artists") {
@@ -121,7 +139,9 @@ export default {
     if (path === "/now-playing.svg" || path === "/now-playing-badge") {
       try {
         const token = await getAccessToken(env);
+        const nowPlayingFetchStartedMs = Date.now();
         const playing = await getNowPlaying(token);
+        const nowPlayingFetchEndedMs = Date.now();
 
         if (!playing || !playing.is_playing || !playing.item) {
           return new Response(svgNowPlayingIdle(), { headers: NO_CACHE_HEADERS });
@@ -131,9 +151,47 @@ export default {
         const artists = item.artists.map((a) => a.name).join(", ");
         const imageUrl = item.album.images[1]?.url ?? item.album.images[0]?.url ?? "";
         const art = imageUrl ? await fetchImageAsBase64(imageUrl) : "";
+        const renderMs = Date.now();
+        const spotifySampleMs = Math.round((nowPlayingFetchStartedMs + nowPlayingFetchEndedMs) / 2);
+        const clientRenderLeadMs = 300;
+        const apiProgressMs = Math.min(
+          item.duration_ms,
+          Math.max(
+            0,
+            progress_ms ?? 0
+          )
+        );
+        let correctedProgressMs = Math.min(
+          item.duration_ms,
+          apiProgressMs + (playing.is_playing ? Math.max(0, renderMs - spotifySampleMs + clientRenderLeadMs) : 0)
+        );
+        const trackKey = item.id ?? `${item.name}:${item.duration_ms}`;
+
+        // Smooth only tiny jitter; allow real seek back/forward changes from Spotify.
+        if (lastNowPlayingState && lastNowPlayingState.trackKey === trackKey) {
+          const expectedProgressMs = Math.min(
+            item.duration_ms,
+            lastNowPlayingState.progressMs + Math.max(0, renderMs - lastNowPlayingState.observedAtMs)
+          );
+          const backwardJitterWindowMs = 2500;
+          const maxForwardDriftMs = 10000;
+          const driftMs = correctedProgressMs - expectedProgressMs;
+
+          if (driftMs < 0 && Math.abs(driftMs) <= backwardJitterWindowMs) {
+            correctedProgressMs = expectedProgressMs;
+          } else if (driftMs > maxForwardDriftMs) {
+            correctedProgressMs = Math.min(item.duration_ms, expectedProgressMs + maxForwardDriftMs);
+          }
+        }
+
+        lastNowPlayingState = {
+          trackKey,
+          progressMs: correctedProgressMs,
+          observedAtMs: renderMs,
+        };
 
         return new Response(
-          svgNowPlaying(item.name, artists, art, progress_ms ?? 0, item.duration_ms),
+          svgNowPlaying(item.name, artists, item.album?.name ?? "", art, correctedProgressMs, item.duration_ms),
           { headers: NO_CACHE_HEADERS }
         );
       } catch (err) {
@@ -142,7 +200,33 @@ export default {
       }
     }
 
-    // Debug endpoint — visit /debug to see token + API status
+    // State + debug endpoints
+    if (path === "/now-playing-state.json") {
+      try {
+        const token = await getAccessToken(env);
+        const playing = await getNowPlaying(token);
+
+        if (!playing || !playing.is_playing || !playing.item) {
+          return new Response(
+            JSON.stringify({ isPlaying: false, trackKey: null }),
+            { headers: JSON_NO_CACHE_HEADERS }
+          );
+        }
+
+        const { item } = playing;
+        const trackKey = item.id ?? `${item.name}:${item.duration_ms}`;
+        return new Response(
+          JSON.stringify({ isPlaying: true, trackKey }),
+          { headers: JSON_NO_CACHE_HEADERS }
+        );
+      } catch {
+        return new Response(
+          JSON.stringify({ isPlaying: false, trackKey: null }),
+          { headers: JSON_NO_CACHE_HEADERS }
+        );
+      }
+    }
+
     if (path === "/debug") {
       try {
         const token = await getAccessToken(env);
