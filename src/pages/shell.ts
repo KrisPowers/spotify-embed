@@ -159,7 +159,7 @@ export function htmlShell(title: string, body: string, activePage: string): stri
     .ctrl-btn.active { background: var(--green-dim); color: var(--green); border-color: rgba(29,185,84,0.4); }
 
     /* Preview */
-    .preview-wrap { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r); padding: 24px; display: flex; align-items: center; justify-content: center; min-height: 80px; position: relative; overflow: hidden; }
+    .preview-wrap { background: var(--bg); border: 1px solid var(--border); border-radius: var(--r); padding: 24px; display: flex; align-items: center; justify-content: center; min-height: 80px; position: relative; overflow: hidden; }
     .preview-wrap img { max-width: 100%; border-radius: 4px; display: block; }
     .social-preview-wrap { min-height: 460px; padding: 18px; }
     .social-preview-wrap img { max-height: 680px; width: auto; object-fit: contain; border: 1px solid #242424; background: #080808; }
