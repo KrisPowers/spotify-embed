@@ -61,20 +61,21 @@ export function svgTopTracks(
   return `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}">
   <defs>
     <style>text { ${SVG_FONT} }</style>
+    <clipPath id="tt-clip">
+      <rect width="${W}" height="${H}" rx="14"/>
+    </clipPath>
   </defs>
-  <!-- Background -->
-  <rect width="${W}" height="${H}" rx="14" fill="#0e0e0e"/>
+  <g clip-path="url(#tt-clip)">
+    <rect width="${W}" height="${H}" fill="#0e0e0e"/>
+    <rect width="${W}" height="40" fill="#111111"/>
+    <text x="${PAD_X}" y="17" font-size="10" fill="#1DB954" font-weight="700" letter-spacing="1.5">SPOTIFY</text>
+    <text x="${PAD_X + 56}" y="17" font-size="10" fill="#333" font-weight="600" letter-spacing="0.5">·</text>
+    <text x="${PAD_X + 64}" y="17" font-size="10" fill="#444" font-weight="500">TOP TRACKS</text>
+    <text x="${W - PAD_X}" y="17" font-size="9" fill="#333" text-anchor="end">${rangeLabel(range)}</text>
+    <line x1="${PAD_X}" y1="26" x2="${W - PAD_X}" y2="26" stroke="#1f1f1f" stroke-width="1"/>
+    ${cards}
+  </g>
   <rect width="${W}" height="${H}" rx="14" fill="none" stroke="#ffffff08" stroke-width="1"/>
-  <!-- Header -->
-  <rect width="${W}" height="40" rx="0" fill="#111111"/>
-  <rect x="0" y="30" width="${W}" height="10" fill="#111111"/>
-  <text x="${PAD_X}" y="17" font-size="10" fill="#1DB954" font-weight="700" letter-spacing="1.5">SPOTIFY</text>
-  <text x="${PAD_X + 56}" y="17" font-size="10" fill="#333" font-weight="600" letter-spacing="0.5">·</text>
-  <text x="${PAD_X + 64}" y="17" font-size="10" fill="#444" font-weight="500">TOP TRACKS</text>
-  <text x="${W - PAD_X}" y="17" font-size="9" fill="#333" text-anchor="end">${rangeLabel(range)}</text>
-  <line x1="${PAD_X}" y1="26" x2="${W - PAD_X}" y2="26" stroke="#1f1f1f" stroke-width="1"/>
-  <!-- Cards -->
-  ${cards}
 </svg>`;
 }
 
