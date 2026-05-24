@@ -1,4 +1,5 @@
 import {
+  createSpotifyClient,
   Env,
   TimeRange,
   getAccessToken,
@@ -85,22 +86,11 @@ export default {
 
     // ── OAuth flow ───────────────────────────────────────────────────
     if (path === "/auth") {
-      const scopes = [
-        "user-read-currently-playing",
-        "user-read-playback-state",
-        "user-top-read",
-      ].join(" ");
-
-      const params = new URLSearchParams({
-        client_id: env.SPOTIFY_CLIENT_ID,
-        response_type: "code",
-        redirect_uri: `${origin}/callback`,
-        scope: scopes,
-        show_dialog: "true",
-      });
-
+      const spotify = createSpotifyClient(env);
       return Response.redirect(
-        `https://accounts.spotify.com/authorize?${params}`,
+        spotify.createAuthorizationUrl({
+          redirectUri: `${origin}/callback`,
+        }),
         302
       );
     }
@@ -113,26 +103,22 @@ export default {
         return new Response(`Authorization error: ${error ?? "missing code"}`, { status: 400 });
       }
 
-      const credentials = btoa(`${env.SPOTIFY_CLIENT_ID}:${env.SPOTIFY_CLIENT_SECRET}`);
-      const tokenRes = await fetch("https://accounts.spotify.com/api/token", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/x-www-form-urlencoded",
-          Authorization: `Basic ${credentials}`,
-        },
-        body: new URLSearchParams({
-          grant_type: "authorization_code",
+      try {
+        const spotify = createSpotifyClient(env);
+        const data = await spotify.exchangeAuthorizationCode({
           code,
-          redirect_uri: `${origin}/callback`,
-        }),
-      });
+          redirectUri: `${origin}/callback`,
+        });
 
-      if (!tokenRes.ok) {
-        return new Response(`Token exchange failed: ${await tokenRes.text()}`, { status: 500 });
+        if (!data.refresh_token) {
+          return new Response("Spotify did not return a refresh token.", { status: 500 });
+        }
+
+        return new Response(pageCallback(data.refresh_token), { headers: HTML_HEADERS });
+      } catch (err) {
+        const message = err instanceof Error ? err.message : String(err);
+        return new Response(`Token exchange failed: ${message}`, { status: 500 });
       }
-
-      const data = await tokenRes.json() as { refresh_token: string };
-      return new Response(pageCallback(data.refresh_token), { headers: HTML_HEADERS });
     }
 
     // ── SVG badge endpoints ──────────────────────────────────────────

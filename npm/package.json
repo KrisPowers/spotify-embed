@@ -1,0 +1,42 @@
+{
+  "name": "spotify-embed",
+  "version": "1.0.0",
+  "description": "Typed Node.js Spotify API wrapper",
+  "type": "module",
+  "main": "./index.js",
+  "types": "./index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./index.d.ts",
+      "import": "./index.js",
+      "default": "./index.js"
+    }
+  },
+  "files": [
+    "index.js",
+    "client.js",
+    "errors.js",
+    "index.d.ts",
+    "client.d.ts",
+    "errors.d.ts",
+    "types.d.ts",
+    "README.md"
+  ],
+  "engines": {
+    "node": ">=18.17"
+  },
+  "scripts": {
+    "build:npm": "npm pack --dry-run --cache ./.npm-cache",
+    "build": "npm pack --dry-run --cache ./.npm-cache",
+    "typecheck:npm": "npm run typecheck",
+    "typecheck": "node -e \"import('./index.js').then(() => console.log('Package entrypoint OK'))\""
+  },
+  "keywords": [
+    "spotify",
+    "node",
+    "typescript",
+    "sdk",
+    "embed"
+  ],
+  "license": "UNLICENSED"
+}

@@ -3,6 +3,8 @@
   "version": "2.0.0",
   "private": true,
   "scripts": {
+    "build:npm": "npm --prefix npm run build",
+    "typecheck:npm": "npm --prefix npm run typecheck",
     "dev": "wrangler dev",
     "deploy": "wrangler deploy",
     "cf-typegen": "wrangler types"
