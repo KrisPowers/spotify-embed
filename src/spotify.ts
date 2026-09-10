@@ -1,4 +1,5 @@
 import {
+  SpotifyApiError,
   SpotifyClient,
   fetchImageAsDataUri,
   sanitizeCount as sanitizeSharedCount,
@@ -66,4 +67,12 @@ export function sanitizeRange(raw: string | null): TimeRange {
 
 export function sanitizeCount(raw: string | null): number {
   return sanitizeSharedCount(raw);
+}
+
+// Spotify refresh tokens now expire, so a dead token shows up either as a
+// rejected refresh at accounts.spotify.com or as a 401 from the Web API.
+export function isTokenExpiredError(err: unknown): boolean {
+  if (!(err instanceof SpotifyApiError)) return false;
+  if (err.status === 401) return true;
+  return err.url.startsWith("https://accounts.spotify.com/api/token") && err.status >= 400 && err.status < 500;
 }

@@ -179,14 +179,26 @@ export function svgSocialCard(input: SocialCardRenderInput): string {
 </svg>`;
 }
 
-export function svgSocialCardError(format: SocialFormat, message = "Could not load Spotify data"): string {
+export function svgSocialCardError(
+  format: SocialFormat,
+  message = "Could not load Spotify data",
+  heading = "Export Error"
+): string {
   const size = getCanvasSize(format);
 
   return `<svg xmlns="http://www.w3.org/2000/svg" width="${size.width}" height="${size.height}" viewBox="0 0 ${size.width} ${size.height}">
   <defs><style>text { ${SVG_FONT} }</style></defs>
   <rect width="${size.width}" height="${size.height}" fill="#090909"/>
   <rect x="64" y="64" width="${size.width - 128}" height="${size.height - 128}" rx="30" fill="#101010" stroke="#232323" stroke-width="2"/>
-  <text x="${size.width / 2}" y="${size.height / 2 - 16}" text-anchor="middle" font-size="48" fill="#f4f4f4" font-weight="700">Export Error</text>
+  <text x="${size.width / 2}" y="${size.height / 2 - 16}" text-anchor="middle" font-size="48" fill="#f4f4f4" font-weight="700">${esc(heading)}</text>
   <text x="${size.width / 2}" y="${size.height / 2 + 38}" text-anchor="middle" font-size="28" fill="#8a8a8a">${esc(message)}</text>
 </svg>`;
+}
+
+export function svgSocialCardTokenExpired(format: SocialFormat): string {
+  return svgSocialCardError(
+    format,
+    "Your refresh token is outdated. Re-authorize to renew it.",
+    "Spotify token expired"
+  );
 }

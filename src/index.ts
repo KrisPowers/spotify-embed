@@ -9,18 +9,20 @@ import {
   fetchImageAsBase64,
   sanitizeRange,
   sanitizeCount,
+  isTokenExpiredError,
 } from "./spotify.js";
 
 import { NO_CACHE_HEADERS, HTML_HEADERS } from "./utils.js";
 
-import { svgNowPlaying, svgNowPlayingIdle } from "./svg/now-playing.js";
-import { svgTopArtists, svgTopArtistsError } from "./svg/top-artists.js";
-import { svgTopTracks, svgTopTracksError } from "./svg/top-tracks.js";
+import { svgNowPlaying, svgNowPlayingIdle, svgNowPlayingTokenExpired } from "./svg/now-playing.js";
+import { svgTopArtists, svgTopArtistsError, svgTopArtistsTokenExpired } from "./svg/top-artists.js";
+import { svgTopTracks, svgTopTracksError, svgTopTracksTokenExpired } from "./svg/top-tracks.js";
 import {
   SocialDataset,
   SocialFormat,
   svgSocialCard,
   svgSocialCardError,
+  svgSocialCardTokenExpired,
 } from "./svg/social-card.js";
 
 import { pageNowPlaying } from "./pages/now-playing.js";
@@ -181,6 +183,9 @@ export default {
           { headers: NO_CACHE_HEADERS }
         );
       } catch (err) {
+        if (isTokenExpiredError(err)) {
+          return new Response(svgNowPlayingTokenExpired(), { headers: NO_CACHE_HEADERS });
+        }
         console.error("now-playing error:", err);
         return new Response(svgNowPlayingIdle(), { headers: NO_CACHE_HEADERS });
       }
@@ -255,6 +260,9 @@ export default {
 
         return new Response(svgTopArtists(withArt, range), { headers: NO_CACHE_HEADERS });
       } catch (err) {
+        if (isTokenExpiredError(err)) {
+          return new Response(svgTopArtistsTokenExpired(), { headers: NO_CACHE_HEADERS });
+        }
         console.error("top-artists error:", err);
         return new Response(svgTopArtistsError(), { headers: NO_CACHE_HEADERS });
       }
@@ -283,6 +291,9 @@ export default {
 
         return new Response(svgTopTracks(withArt, range), { headers: NO_CACHE_HEADERS });
       } catch (err) {
+        if (isTokenExpiredError(err)) {
+          return new Response(svgTopTracksTokenExpired(), { headers: NO_CACHE_HEADERS });
+        }
         console.error("top-tracks error:", err);
         return new Response(svgTopTracksError(), { headers: NO_CACHE_HEADERS });
       }
@@ -350,6 +361,9 @@ export default {
           { headers: NO_CACHE_HEADERS }
         );
       } catch (err) {
+        if (isTokenExpiredError(err)) {
+          return new Response(svgSocialCardTokenExpired(format), { headers: NO_CACHE_HEADERS });
+        }
         console.error("social-card error:", err);
         return new Response(svgSocialCardError(format), { headers: NO_CACHE_HEADERS });
       }
