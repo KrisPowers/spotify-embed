@@ -17,13 +17,21 @@ export const DEFAULT_SPOTIFY_SCOPES = [
 ];
 
 function getFetchImplementation(fetchOverride) {
-  const fetchImplementation = fetchOverride ?? globalThis.fetch;
+  if (fetchOverride !== undefined) {
+    if (typeof fetchOverride !== "function") {
+      throw new Error("SpotifyClient requires a Fetch API implementation.");
+    }
 
-  if (typeof fetchImplementation !== "function") {
+    return fetchOverride;
+  }
+
+  if (typeof globalThis.fetch !== "function") {
     throw new Error("SpotifyClient requires a Fetch API implementation.");
   }
 
-  return fetchImplementation;
+  // Cloudflare Workers rejects the global fetch when it is called with any
+  // receiver other than globalThis, so bind it before storing it anywhere.
+  return globalThis.fetch.bind(globalThis);
 }
 
 function encodeBasicAuth(clientId, clientSecret) {
