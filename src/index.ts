@@ -1,4 +1,5 @@
 import {
+  createSpotifyClient,
   Env,
   TimeRange,
   getAccessToken,
@@ -8,18 +9,20 @@ import {
   fetchImageAsBase64,
   sanitizeRange,
   sanitizeCount,
+  isTokenExpiredError,
 } from "./spotify.js";
 
 import { NO_CACHE_HEADERS, HTML_HEADERS } from "./utils.js";
 
-import { svgNowPlaying, svgNowPlayingIdle } from "./svg/now-playing.js";
-import { svgTopArtists, svgTopArtistsError } from "./svg/top-artists.js";
-import { svgTopTracks, svgTopTracksError } from "./svg/top-tracks.js";
+import { svgNowPlaying, svgNowPlayingIdle, svgNowPlayingTokenExpired } from "./svg/now-playing.js";
+import { svgTopArtists, svgTopArtistsError, svgTopArtistsTokenExpired } from "./svg/top-artists.js";
+import { svgTopTracks, svgTopTracksError, svgTopTracksTokenExpired } from "./svg/top-tracks.js";
 import {
   SocialDataset,
   SocialFormat,
   svgSocialCard,
   svgSocialCardError,
+  svgSocialCardTokenExpired,
 } from "./svg/social-card.js";
 
 import { pageNowPlaying } from "./pages/now-playing.js";
@@ -85,22 +88,11 @@ export default {
 
     // ── OAuth flow ───────────────────────────────────────────────────
     if (path === "/auth") {
-      const scopes = [
-        "user-read-currently-playing",
-        "user-read-playback-state",
-        "user-top-read",
-      ].join(" ");
-
-      const params = new URLSearchParams({
-        client_id: env.SPOTIFY_CLIENT_ID,
-        response_type: "code",
-        redirect_uri: `${origin}/callback`,
-        scope: scopes,
-        show_dialog: "true",
-      });
-
+      const spotify = createSpotifyClient(env);
       return Response.redirect(
-        `https://accounts.spotify.com/authorize?${params}`,
+        spotify.createAuthorizationUrl({
+          redirectUri: `${origin}/callback`,
+        }),
         302
       );
     }
@@ -113,26 +105,22 @@ export default {
         return new Response(`Authorization error: ${error ?? "missing code"}`, { status: 400 });
       }
 
-      const credentials = btoa(`${env.SPOTIFY_CLIENT_ID}:${env.SPOTIFY_CLIENT_SECRET}`);
-      const tokenRes = await fetch("https://accounts.spotify.com/api/token", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/x-www-form-urlencoded",
-          Authorization: `Basic ${credentials}`,
-        },
-        body: new URLSearchParams({
-          grant_type: "authorization_code",
+      try {
+        const spotify = createSpotifyClient(env);
+        const data = await spotify.exchangeAuthorizationCode({
           code,
-          redirect_uri: `${origin}/callback`,
-        }),
-      });
+          redirectUri: `${origin}/callback`,
+        });
 
-      if (!tokenRes.ok) {
-        return new Response(`Token exchange failed: ${await tokenRes.text()}`, { status: 500 });
+        if (!data.refresh_token) {
+          return new Response("Spotify did not return a refresh token.", { status: 500 });
+        }
+
+        return new Response(pageCallback(data.refresh_token), { headers: HTML_HEADERS });
+      } catch (err) {
+        const message = err instanceof Error ? err.message : String(err);
+        return new Response(`Token exchange failed: ${message}`, { status: 500 });
       }
-
-      const data = await tokenRes.json() as { refresh_token: string };
-      return new Response(pageCallback(data.refresh_token), { headers: HTML_HEADERS });
     }
 
     // ── SVG badge endpoints ──────────────────────────────────────────
@@ -195,6 +183,9 @@ export default {
           { headers: NO_CACHE_HEADERS }
         );
       } catch (err) {
+        if (isTokenExpiredError(err)) {
+          return new Response(svgNowPlayingTokenExpired(), { headers: NO_CACHE_HEADERS });
+        }
         console.error("now-playing error:", err);
         return new Response(svgNowPlayingIdle(), { headers: NO_CACHE_HEADERS });
       }
@@ -269,6 +260,9 @@ export default {
 
         return new Response(svgTopArtists(withArt, range), { headers: NO_CACHE_HEADERS });
       } catch (err) {
+        if (isTokenExpiredError(err)) {
+          return new Response(svgTopArtistsTokenExpired(), { headers: NO_CACHE_HEADERS });
+        }
         console.error("top-artists error:", err);
         return new Response(svgTopArtistsError(), { headers: NO_CACHE_HEADERS });
       }
@@ -297,6 +291,9 @@ export default {
 
         return new Response(svgTopTracks(withArt, range), { headers: NO_CACHE_HEADERS });
       } catch (err) {
+        if (isTokenExpiredError(err)) {
+          return new Response(svgTopTracksTokenExpired(), { headers: NO_CACHE_HEADERS });
+        }
         console.error("top-tracks error:", err);
         return new Response(svgTopTracksError(), { headers: NO_CACHE_HEADERS });
       }
@@ -364,6 +361,9 @@ export default {
           { headers: NO_CACHE_HEADERS }
         );
       } catch (err) {
+        if (isTokenExpiredError(err)) {
+          return new Response(svgSocialCardTokenExpired(format), { headers: NO_CACHE_HEADERS });
+        }
         console.error("social-card error:", err);
         return new Response(svgSocialCardError(format), { headers: NO_CACHE_HEADERS });
       }

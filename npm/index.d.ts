@@ -1,0 +1,30 @@
+export {
+  DEFAULT_SPOTIFY_SCOPES,
+  SpotifyClient,
+  fetchImageAsDataUri,
+  sanitizeCount,
+  sanitizeRange,
+  toSpotifyApiTimeRange,
+} from "./client.js";
+export { SpotifyApiError } from "./errors.js";
+export type {
+  FetchImageAsDataUriOptions,
+  SanitizeCountOptions,
+  SpotifyAlbum,
+  SpotifyApiTimeRange,
+  SpotifyArtist,
+  SpotifyArtistSummary,
+  SpotifyAuthorizationUrlOptions,
+  SpotifyClientOptions,
+  SpotifyCodeExchangeOptions,
+  SpotifyCurrentlyPlaying,
+  SpotifyCurrentlyPlayingTrack,
+  SpotifyExternalUrls,
+  SpotifyFetch,
+  SpotifyImage,
+  SpotifyNormalizedTimeRange,
+  SpotifyTimeRange,
+  SpotifyTokenResponse,
+  SpotifyTopItemsOptions,
+  SpotifyTrack,
+} from "./types.js";

@@ -90,3 +90,18 @@ export function svgTopArtistsError(): string {
   <text x="20" y="36" font-size="13" fill="#444">Could not load top artists</text>
 </svg>`;
 }
+
+export function svgTopArtistsTokenExpired(): string {
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="480" height="72" viewBox="0 0 480 72">
+  <defs><style>text { ${SVG_FONT} }</style></defs>
+  <rect width="480" height="72" rx="12" fill="#0e0e0e"/>
+  <rect width="480" height="72" rx="12" fill="none" stroke="#e8a33d33" stroke-width="1"/>
+  <svg x="18" y="25" width="22" height="22" viewBox="0 0 24 24">
+    <path d="M12 3.2 1.8 20.8h20.4L12 3.2z" fill="none" stroke="#e8a33d" stroke-width="1.8" stroke-linejoin="round"/>
+    <path d="M12 9.6v4.6" stroke="#e8a33d" stroke-width="1.8" stroke-linecap="round"/>
+    <circle cx="12" cy="17.4" r="1.05" fill="#e8a33d"/>
+  </svg>
+  <text x="56" y="34" font-size="13" fill="#e8a33d" font-weight="600">Spotify token expired</text>
+  <text x="56" y="52" font-size="11" fill="#7a7a7a">Your refresh token is outdated. Re-authorize to renew it.</text>
+</svg>`;
+}
